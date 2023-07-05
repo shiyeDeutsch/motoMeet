@@ -1,0 +1,106 @@
+
+using Microsoft.EntityFrameworkCore;
+using motoMeet;
+using Route = motoMeet.Route;
+
+// public interface IRouteService
+// {
+//     Task<IEnumerable<Route>> GetRoutes();
+//     Task<Route> GetRoute(int id);
+//     Task CreateRoute(Route route);
+//     Task AddPointToRoute(int routeId, RoutePoint point);
+// }
+
+// public class RouteService : IRouteService
+// {
+//     private readonly MotoMeetDbContext _context;
+
+//     public RouteService(MotoMeetDbContext context)
+//     {
+//         _context = context;
+//     }
+
+//     public async Task<IEnumerable<motoMeet.Route>> GetRoutes()
+//     {
+//         return await _context.Routes.Include(r => r.RoutePoints).ToListAsync();
+//     }
+
+//     public async Task<Route> GetRoute(int id)
+//     {
+//         return await _context.Routes.Include(r => r.RoutePoints).FirstOrDefaultAsync(r => r.ID == id);
+//     }
+
+//     public async Task CreateRoute(motoMeet.Route route)
+//     {
+//         _context.Routes.Add(route);
+//         await _context.SaveChangesAsync();
+//     }
+
+//     public async Task AddPointToRoute(int routeId, RoutePoint point)
+//     {
+//         var route = await _context.Routes.FindAsync(routeId);
+//         if (route == null)
+//         {
+//             throw new Exception("Route not found");
+//         }
+
+//         point.RouteID = routeId;
+//         _context.RoutePoints.Add(point);
+//         await _context.SaveChangesAsync();
+//     }
+
+//     Task<IEnumerable<Route>> IRouteService.GetRoutes()
+//     {
+//         throw new NotImplementedException();
+//     }
+
+   
+// }
+
+
+public interface IRouteService
+{
+    Task<IEnumerable<Route>> GetRoutes();
+    Task<Route> GetRoute(int id);
+    Task CreateRoute(Route route);
+    Task AddPointToRoute(int routeId, RoutePoint point);
+}
+
+public class RouteService : IRouteService
+{
+    private readonly IRepository<Route> _routeRepository;
+    private readonly IRepository<RoutePoint> _pointRepository;
+
+    public RouteService(IRepository<Route> routeRepository, IRepository<RoutePoint> pointRepository)
+    {
+        _routeRepository = routeRepository;
+        _pointRepository = pointRepository;
+    }
+
+    public async Task<IEnumerable<Route>> GetRoutes()
+    {
+        return await _routeRepository.GetAllAsync();
+    }
+
+    public async Task<Route> GetRoute(int id)
+    {
+        return await _routeRepository.GetByIdAsync(id);
+    }
+
+    public async Task CreateRoute(Route route)
+    {
+        await _routeRepository.AddAsync(route);
+    }
+
+    public async Task AddPointToRoute(int routeId, RoutePoint point)
+    {
+        var route = await _routeRepository.GetByIdAsync(routeId);
+        if (route == null)
+        {
+            throw new Exception("Route not found");
+        }
+
+        point.RouteID = routeId;
+        await _pointRepository.AddAsync(point);
+    }
+}

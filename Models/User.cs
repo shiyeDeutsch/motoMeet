@@ -13,6 +13,7 @@ namespace motoMeet
         public string NationalCode { get; set; }
         public DateTime? AddedOn { get; set; }
         public DateTime? EditOn { get; set; }
+     
     }
 
     // DbContext class for the database
@@ -23,6 +24,9 @@ namespace motoMeet
         {
         }
         public DbSet<Person> Persons { get; set; }
+        public DbSet<Route> Routes { get; set; }
+        public DbSet<RoutePoint> RoutePoints { get; set; }
+        public DbSet<DifficultyLevel> DifficultyLevels { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
