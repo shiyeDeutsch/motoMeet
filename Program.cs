@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using motoMeet;
 using motoMeet.Manager;
+  
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,8 +21,24 @@ builder.Services.AddScoped<IRouteService, RouteService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<UserManager>();
 builder.Services.AddScoped<RouteManager>();
-//var connectionString = builder.Configuration.GetConnectionString("ConfigDB");
-//builder.Services.AddDbContext<MotoMeetDbContext>(x => x.UseSqlServer(connectionString));
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+   .AddJwtBearer(options =>
+   {
+       options.TokenValidationParameters = new TokenValidationParameters
+       {
+           ValidateIssuerSigningKey = true,
+           IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["JwtSecretKey"])),
+           ValidateIssuer = false,
+           ValidateAudience = false
+       };
+   });
+
+
+
+
+
 
 var app = builder.Build();
 

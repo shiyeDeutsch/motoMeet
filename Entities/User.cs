@@ -6,17 +6,18 @@ using NetTopologySuite.IO;
 namespace motoMeet
 {
     // Class representing the Persons table
-    public class Person
-    {
-        public int ID { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string RoleID { get; set; }
-        public string NationalCode { get; set; }
-        public DateTime? AddedOn { get; set; }
-        public DateTime? EditOn { get; set; }
-
-    }
+  public class Person
+{
+    public int ID { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string RoleID { get; set; }
+    public string NationalCode { get; set; }
+    public DateTime? AddedOn { get; set; }
+    public DateTime? EditOn { get; set; }
+    public string Email { get; set; }
+    public string PasswordHash { get; set; }
+}
 
     // DbContext class for the database
     public class MotoMeetDbContext : DbContext

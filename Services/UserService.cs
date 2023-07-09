@@ -11,6 +11,7 @@ namespace motoMeet
         Task<Person> UpdateUser(Person user);
         Task<bool> DeleteUser(int id);
         Task<bool> ExistValidation(Expression<Func<Person, bool>> expression);
+        Task<Person> FindFirstByExpression(Expression<Func<Person, bool>> expression);
 
     }
 
@@ -78,8 +79,13 @@ namespace motoMeet
 
         public async Task<bool> ExistValidation(Expression<Func<Person, bool>> expression)
         {
-            var user = await _personRepository.FindByExpressionAsync(expression);
-            return user.Any();
+            var user = await _personRepository.FindFirstByExpressionAsync(expression);
+            return user != null;
+        }
+        public async Task<Person> FindFirstByExpression(Expression<Func<Person, bool>> expression)
+        {
+            var user = await _personRepository.FindFirstByExpressionAsync(expression);
+            return user;
         }
 
 

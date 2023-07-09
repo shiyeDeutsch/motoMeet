@@ -13,6 +13,11 @@ namespace motoMeet
         void Delete(T entity);
         Task SaveAsync();
         Task ReloadAsync(T entity);
+        // Task DeleteByIdAsync(int id);
+        //Task BulkInsertAsync(IEnumerable<T> entities);
+        Task<T> FindFirstByExpressionAsync(Expression<Func<T, bool>> expression);
+
+
     }
 
     public class Repository<T> : IRepository<T> where T : class
@@ -56,6 +61,8 @@ namespace motoMeet
             _dbSet.Remove(entity);
         }
 
+
+
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();
@@ -73,6 +80,12 @@ namespace motoMeet
         {
             await _dbSet.Entry(entity).ReloadAsync();
         }
+
+        public async Task<T> FindFirstByExpressionAsync(Expression<Func<T, bool>> expression)
+        {
+            return await _dbSet.FirstOrDefaultAsync(expression);
+        }
+
 
     }
 
