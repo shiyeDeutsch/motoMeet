@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,11 +17,31 @@ namespace motoMeet
 
         //GET: api/users
         [HttpGet]
+        // [Authorize]
+        // public async Task<IActionResult> GetAll()
+        // {
+        //     try
+        //     {
+        //         var users = await _userManager.GetUsers();
+        //         return Ok(users);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         // Log the exception here
+        //         return StatusCode(500, "An error occurred while processing your request");
+        //     }
+        // }
+
+
+        [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAll()
         {
             var users = await _userManager.GetUsers();
             return Ok(users);
         }
+
+
 
         // GET: api/users/5
         [HttpGet("{id}")]
@@ -36,25 +57,19 @@ namespace motoMeet
 
         // POST: api/users
         [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> Create([FromBody] Person user)
         {
-
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var newUser = await _userManager.CreateUser(user);
-            //  await _repository.SaveAsync();
-            //  return CreatedAtAction(nameof(GetById), new { id = user.ID }, user);
-            return Ok(newUser);
+            var (newUser, token) = await _userManager.CreateUser(user);
+            return Ok(new { User = newUser, Token = token });
         }
+
 
         // PUT: api/users/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] Person updatedUser)
         {
-            var user =await  _userManager.UpdateUser(id, updatedUser);
+            var user = await _userManager.UpdateUser(id, updatedUser);
 
             if (user == null)
                 return NotFound();

@@ -15,8 +15,8 @@ namespace motoMeet
     public string NationalCode { get; set; }
     public DateTime? AddedOn { get; set; }
     public DateTime? EditOn { get; set; }
-    public string Email { get; set; }
-    public string PasswordHash { get; set; }
+    public string? Email { get; set; }
+    public string? PasswordHash { get; set; }
 }
 
     // DbContext class for the database

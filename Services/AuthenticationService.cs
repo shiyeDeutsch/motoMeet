@@ -9,7 +9,9 @@ namespace motoMeet
     public interface IAuthService
     {
         Task<string> AuthenticateAsync(string email, string password);
-        // Include other relevant methods, like Register, ForgotPassword etc.
+        string CreatePasswordHash(string password);
+        string GenerateJwtToken(Person user);
+        bool CheckPassword(Person user, string password);
     }
 
     public class AuthService : IAuthService
@@ -44,7 +46,7 @@ namespace motoMeet
             return token;
         }
 
-        private bool CheckPassword(Person user, string password)
+        public bool CheckPassword(Person user, string password)
         {
             byte[] hashBytes = Convert.FromBase64String(user.PasswordHash);
             byte[] salt = new byte[16];
@@ -63,7 +65,7 @@ namespace motoMeet
             return true;
         }
 
-        private string CreatePasswordHash(string password)
+        public string CreatePasswordHash(string password)
         {
             byte[] salt;
             new RNGCryptoServiceProvider().GetBytes(salt = new byte[16]);
@@ -77,10 +79,10 @@ namespace motoMeet
             }
         }
 
-        private string GenerateJwtToken(Person user)
+        public string GenerateJwtToken(Person user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration.GetValue<string>("JwtSecretKey"));
+            var key = Encoding.ASCII.GetBytes(_configuration.GetValue<string>("your16CharacterKey"));
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

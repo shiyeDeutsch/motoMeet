@@ -3,13 +3,36 @@ namespace motoMeet
     public class UserManager
     {
         private readonly IUserService _userService;
+        private readonly IAuthService _AuthService;
 
-        public UserManager(IUserService userService)
+
+        public UserManager(IUserService userService, IAuthService AuthService)
         {
             _userService = userService;
+            _AuthService = AuthService;
         }
 
-        public async Task<Person> CreateUser(Person user)
+        // public async Task<Person> CreateUser(Person user)
+        // {
+        //     // Validate if a user with the same NationalCode already exists.
+        //     bool exists = await _userService.ExistValidation(u => u.NationalCode == user.NationalCode);
+
+        //     if (exists)
+        //     {
+        //         throw new Exception("User with the same NationalCode already exists.");
+        //     }
+        //     else
+        //     {
+        //         var PasswordHashed = _AuthService.CreatePasswordHash(user.Email);
+        //         user.Email = PasswordHashed;
+
+        //         user = await _userService.CreateUser(user);
+        //         var token = _AuthService.GenerateJwtToken(user);
+        //         return user;
+        //     }
+        // }
+
+        public async Task<(Person, string)> CreateUser(Person user)
         {
             // Validate if a user with the same NationalCode already exists.
             bool exists = await _userService.ExistValidation(u => u.NationalCode == user.NationalCode);
@@ -20,9 +43,15 @@ namespace motoMeet
             }
             else
             {
-                return await _userService.CreateUser(user);
+                var PasswordHashed = _AuthService.CreatePasswordHash(user.Email);
+                user.Email = PasswordHashed;
+
+                user = await _userService.CreateUser(user);
+                var token = _AuthService.GenerateJwtToken(user);
+                return (user, token);
             }
         }
+
         public async Task<IEnumerable<Person>> GetUsers()
         {
             return await _userService.GetUsers();

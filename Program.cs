@@ -19,6 +19,7 @@ builder.Services.AddDbContext<MotoMeetDbContext>(options =>
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IRouteService, RouteService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped< IAuthService, AuthService>();
 builder.Services.AddScoped<UserManager>();
 builder.Services.AddScoped<RouteManager>();
 
@@ -29,7 +30,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
        options.TokenValidationParameters = new TokenValidationParameters
        {
            ValidateIssuerSigningKey = true,
-           IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["JwtSecretKey"])),
+           IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["your16CharacterKey"])),
            ValidateIssuer = false,
            ValidateAudience = false
        };
