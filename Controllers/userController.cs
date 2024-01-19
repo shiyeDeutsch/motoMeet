@@ -14,28 +14,9 @@ namespace motoMeet
         {
             _userManager = userManager;
         }
-
-        //GET: api/users
-        [HttpGet]
-        // [Authorize]
-        // public async Task<IActionResult> GetAll()
-        // {
-        //     try
-        //     {
-        //         var users = await _userManager.GetUsers();
-        //         return Ok(users);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         // Log the exception here
-        //         return StatusCode(500, "An error occurred while processing your request");
-        //     }
-        // }
-
-
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> GetAll()
+         [Authorize]
+         [HttpGet]
+        public async Task<IActionResult> getAll()
         {
             var users = await _userManager.GetUsers();
             return Ok(users);
@@ -45,7 +26,7 @@ namespace motoMeet
 
         // GET: api/users/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> getById(int id)
         {
             var user = await _userManager.GetUser(id);
             if (user == null)
@@ -56,9 +37,9 @@ namespace motoMeet
         }
 
         // POST: api/users
+         
         [HttpPost]
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Person user)
+        public async Task<IActionResult> create([FromBody] Person user)
         {
             var (newUser, token) = await _userManager.CreateUser(user);
             return Ok(new { User = newUser, Token = token });
@@ -67,7 +48,7 @@ namespace motoMeet
 
         // PUT: api/users/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Person updatedUser)
+        public async Task<IActionResult> update(int id, [FromBody] Person updatedUser)
         {
             var user = await _userManager.UpdateUser(id, updatedUser);
 
