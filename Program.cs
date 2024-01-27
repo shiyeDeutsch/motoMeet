@@ -20,8 +20,11 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IRouteService, RouteService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IMailingService, MailingService>();
+builder.Services.AddScoped<IEmailService,EmailService>();
 builder.Services.AddScoped<UserManager>();
 builder.Services.AddScoped<RouteManager>();
+builder.Services.AddScoped<AuthManager>();
 
 // string secretKey = builder.Configuration["JwtSettings:SecretKey"]; 
 // Console.Write (secretKey);

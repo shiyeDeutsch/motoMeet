@@ -38,12 +38,12 @@ namespace motoMeet
 
         // POST: api/users
          
-        [HttpPost]
-        public async Task<IActionResult> create([FromBody] Person user)
-        {
-            var (newUser, token) = await _userManager.CreateUser(user);
-            return Ok(new { User = newUser, Token = token });
-        }
+        // [HttpPost]
+        // public async Task<IActionResult> create([FromBody]  user)
+        // {
+        //     var (newUser, token) = await _userManager.CreateUser(user);
+        //     return Ok(new { User = newUser, Token = token });
+        // }
 
 
         // PUT: api/users/5

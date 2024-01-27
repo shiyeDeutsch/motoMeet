@@ -4,8 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace motoMeet
 {
-    [ApiController]
     [Route("api/auth")]
+    [ApiController]
+
     public class LoginController : ControllerBase
     {
         private readonly AuthManager _authManager;
@@ -15,7 +16,7 @@ namespace motoMeet
             _authManager = authManager;
             _userManager = userManager;
         }
-        [HttpPost]
+        [HttpPost("login")]
         public async Task<IActionResult> Auth([FromBody] LoginModel model)
         {
             Console.WriteLine(model.Email + "  " + model.Password);
@@ -34,16 +35,21 @@ namespace motoMeet
         }
 
 
-        [HttpPost]
+        [HttpPost("register")]
         public async Task<IActionResult> Registrate([FromBody] RegistrateModel model)
         {
             var userResult = await _userManager.CreateUser(model);
             if (userResult.IsSuccess)
+            {
+                _authManager.SendVerificationEmail(userResult.User.Id);
                 return Ok(new { User = userResult.User, Token = userResult.Token });
-                
+            }
             else
                 return BadRequest(new { ErrorMessage = userResult.ErrorMessage });
         }
+
+    
+    
 
     }
 

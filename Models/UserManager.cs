@@ -93,6 +93,7 @@ namespace motoMeet
             }
             else
             {
+                
                 var PasswordHash = _authService.CreatePasswordHash(user.Password);
                 var person = new Person
                 {
@@ -105,6 +106,7 @@ namespace motoMeet
                     Address = user.Address,
                     PasswordHash = PasswordHash,
                     AddedOn = DateTime.Now,
+                    isVerified=false,
                 };
                 var newUser = await _userService.CreateUser(person);
                 var token = _authService.GenerateJwtToken(newUser);

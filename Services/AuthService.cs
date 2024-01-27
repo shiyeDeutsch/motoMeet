@@ -11,18 +11,22 @@ namespace motoMeet
         Task<AuthenticationResult> AuthenticateAsync(string email, string password);
         string CreatePasswordHash(string password);
         string GenerateJwtToken(Person user);
+        public string GenerateVerificationLink(int userId);
         bool CheckPassword(Person user, string password);
+           
     }
 
     public class AuthService : IAuthService
     {
         private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
+
         public AuthService(IUserService userService, IConfiguration configuration)
         {
             _userService = userService;
             _configuration = configuration;
-        }
+
+        }//
         // public async Task<string> AuthenticateAsync(string email, string password)
         // {
         //     // Get the user by email
@@ -134,9 +138,56 @@ namespace motoMeet
 
 
         }
+        public string GenerateVerificationLink(int userId)
+        {
+            // Generate a secure token (e.g., GUID, JWT, etc.)
+            var token = GenerateSecureToken();
+
+            // Construct the verification link
+            // Assume "baseVerificationUrl" is the base URL for your verification endpoint
+            string baseVerificationUrl = "https://localhost:7004/Auth/Verify";
+            string verificationLink = $"{baseVerificationUrl}?token={token}&userId={userId}";
+
+            // Save the token with the user's information in your database with an expiration time
+            // You might also want to include other relevant information
+            SaveVerificationToken(userId, token);
+
+            return verificationLink;
+        }
+
+        private string GenerateSecureToken()
+        {
+            // Example: using a GUID as a simple token
+            return Guid.NewGuid().ToString();
+        }
+
+        private async Task SaveVerificationToken(int userId, string token)
+        {
+            // Find the user by ID
+            var user = await _userService.GetUser(userId);
+            if (user == null)
+            {
+                throw new Exception("User not found.");
+            }
+
+            // Set the verification token and its expiration
+            user.VerificationToken = token;
+            user.VerificationTokenExpiration = DateTime.UtcNow.AddDays(7); // Set expiration to 7 days from now
+
+            // Update the user in the database
+            await _userService.UpdateUser(user);
+        }
+        public async Task<bool> ValidateToken(string token, int userId)
+        {
+            var user = await _userService.GetUser(userId);
+            if (user.VerificationToken == token)
+                return true;
+            else return false;
+        }
 
     }
-    public class AuthenticationResult:OperationResult
+
+    public class AuthenticationResult : OperationResult
     {
         public string Token { get; set; }
     }
