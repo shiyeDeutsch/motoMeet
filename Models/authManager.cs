@@ -23,6 +23,9 @@ public class AuthManager
         _mailingService.SendVerificationEmailAsync(user.Email, link);
 
     }
+    public async Task<bool> ValidateToken(string token, int userId)
+    {
+        return await _authService.ValidateToken(token, userId);
+    }
 
- 
 }

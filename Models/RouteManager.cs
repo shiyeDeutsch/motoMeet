@@ -3,9 +3,7 @@ namespace motoMeet.Manager
 
     public class RouteManager
     {
-
         private readonly IRouteService _routeService;
-
         public RouteManager(IRouteService routeService)
         {
             _routeService = routeService;
@@ -23,7 +21,6 @@ namespace motoMeet.Manager
                 throw new Exception("An error occurred while fetching the routes.", ex);
             }
         }
-
         public async Task<Route> GetRoute(int id)
         {
             try
@@ -42,7 +39,10 @@ namespace motoMeet.Manager
             }
         }
 
-
+        public async Task<Route> CreateRoute(NewRouteModel newRoute)
+        {
+ ///  gpt please imploment here!!
+        }
     }
 
 }

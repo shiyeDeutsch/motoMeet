@@ -39,16 +39,16 @@ namespace motoMeet
             return Ok(route);
         }
 
-        // // POST: api/Routes
-        // [HttpPost]
-        // public async Task<ActionResult<Route>> CreateRoute([FromBody] Route route)
-        // {
-        //     await _routeService.CreateRoute(route);
+        // POST: api/Routes
+        [HttpPost]
+        public async Task<ActionResult<Route>> CreateRoute([FromBody] NewRouteModel route)
+        {
+            await _routeManager.CreateRoute(route);
 
-        //     return CreatedAtAction(nameof(GetRoute), new { id = route.ID }, route);
-        // }
+        //    return CreatedAtAction(nameof(GetRoute), new { id = route.ID }, route);
+        }
 
-        // // POST: api/Routes/5/Points
+        // POST: api/Routes/5/Points
         // [HttpPost("{id}/Points")]
         // public async Task<ActionResult<RoutePoint>> AddPointToRoute(int id, [FromBody] RoutePoint point)
         // {

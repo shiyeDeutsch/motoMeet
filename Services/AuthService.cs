@@ -13,7 +13,7 @@ namespace motoMeet
         string GenerateJwtToken(Person user);
         public string GenerateVerificationLink(int userId);
         bool CheckPassword(Person user, string password);
-           
+        Task<bool> ValidateToken(string token, int userId);
     }
 
     public class AuthService : IAuthService
@@ -145,7 +145,7 @@ namespace motoMeet
 
             // Construct the verification link
             // Assume "baseVerificationUrl" is the base URL for your verification endpoint
-            string baseVerificationUrl = "https://localhost:7004/Auth/Verify";
+            string baseVerificationUrl = "https://localhost:7004/api/Auth/Verify";
             string verificationLink = $"{baseVerificationUrl}?token={token}&userId={userId}";
 
             // Save the token with the user's information in your database with an expiration time
@@ -180,10 +180,15 @@ namespace motoMeet
         public async Task<bool> ValidateToken(string token, int userId)
         {
             var user = await _userService.GetUser(userId);
-            if (user.VerificationToken == token)
+            if (user != null && user.VerificationToken == token && user.VerificationTokenExpiration > DateTime.UtcNow)
+            {
+                user.IsVerified = true;
+                await _userService.UpdateUser(user);
                 return true;
+            }
             else return false;
         }
+
 
     }
 

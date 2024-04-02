@@ -10,33 +10,62 @@ namespace motoMeet
         public string? Username { get; set; }
         public int Id { get; set; }
         public string? FirstName { get; set; }
-        public string ?LastName { get; set; }
-        public string ?PhoneNumber { get; set; }
+        public string? LastName { get; set; }
+        public string? PhoneNumber { get; set; }
         public DateTime? AddedOn { get; set; }
         public DateTime? EditOn { get; set; }
-        public string ?ProfilePictureUrl { get; set; }
-        public string ?Bio { get; set; }
-        public string ?Address { get; set; }
+        public string? ProfilePictureUrl { get; set; }
+        public string? Bio { get; set; }
+        public string? Address { get; set; }
         public string? Email { get; set; }
         public string? PasswordHash { get; set; }
         public string? VerificationToken { get; set; }
         public DateTime? VerificationTokenExpiration { get; set; }
-        public bool? isVerified { get; set; }
+        public bool? IsVerified { get; set; }
         // language
-        public int countryId { get; set; }
+        public int CountryId { get; set; }
 
     }
+    public class UserDto
+    {
+        public int Id { get; set; }
+        public string? Username { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Email { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? Bio { get; set; }
+        public string? Address { get; set; }
+        public int? CountryId { get; set; }
+        public string? Token { get; set; }
+        public UserDto() { }
+        public UserDto(Person person)
+        {
+            Id = person.Id;
+            Username = person.Username;
+            FirstName = person.FirstName;
+            LastName = person.LastName;
+            Email = person.Email;
+            PhoneNumber = person.PhoneNumber;
+            Bio = person.Bio;
+            Address = person.Address;
+            CountryId = person.CountryId;
+
+        }
+    }
+
     public class RegistrateModel
     {
-        public string Username { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string PhoneNumber { get; set; }
-        public string ProfilePictureUrl { get; set; }
-        public string Bio { get; set; }
-        public string Address { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public string? Username { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? ProfilePictureUrl { get; set; }
+        public string? Bio { get; set; }
+        public string? Address { get; set; }
+        public string? Email { get; set; }
+        public string? Password { get; set; }
+        public int CountryId { get; set; }
     }
 
 
@@ -48,8 +77,8 @@ namespace motoMeet
         {
             modelBuilder.Entity<RouteTag>()
                  .HasKey(rt => new { rt.RouteId, rt.TagId });
-                   modelBuilder.Entity<RoutesTypes>()
-        .HasKey(rt => new { rt.RouteId, rt.RouteTypeId });
+            modelBuilder.Entity<RoutesTypes>()
+ .HasKey(rt => new { rt.RouteId, rt.RouteTypeId });
         }
         public MotoMeetDbContext(DbContextOptions<MotoMeetDbContext> options) : base(options)
         {

@@ -93,7 +93,7 @@ namespace motoMeet
             }
             else
             {
-                
+
                 var PasswordHash = _authService.CreatePasswordHash(user.Password);
                 var person = new Person
                 {
@@ -106,12 +106,28 @@ namespace motoMeet
                     Address = user.Address,
                     PasswordHash = PasswordHash,
                     AddedOn = DateTime.Now,
-                    isVerified=false,
+                    IsVerified = false,
+                    CountryId=user.CountryId,
                 };
                 var newUser = await _userService.CreateUser(person);
                 var token = _authService.GenerateJwtToken(newUser);
 
-                return new UserCreationResult { IsSuccess = true, User = newUser, Token = token };
+                var userDto = new UserDto
+                {
+                    Id = newUser.Id,
+                    Username = newUser.Username,
+                    FirstName = newUser.FirstName,
+                    LastName = newUser.LastName,
+                    Email = newUser.Email,
+                    PhoneNumber = newUser.PhoneNumber,
+                    Bio = newUser.Bio,
+                    Address = newUser.Address,
+                    Token = token,
+                    CountryId=newUser.CountryId
+                };
+
+
+                return new UserCreationResult { IsSuccess = true, User = userDto, Token = token };
             }
         }
 
@@ -139,10 +155,12 @@ namespace motoMeet
             return await _userService.UpdateUser(user);
         }
 
-        public async Task<Person> GetUserData(string email)
+        public async Task<UserDto> GetUserData(string email)
         {
-            return await _userService.FindFirstByExpression(p => p.Email == email);
+            var user = await _userService.FindFirstByExpression(p => p.Email == email);
 
+            var userDto = new UserDto(user);
+            return userDto;
         }
 
 
@@ -162,14 +180,14 @@ namespace motoMeet
                 return false;
 
             // Example password policy: at least 8 characters, 1 number, 1 uppercase, 1 lowercase
-            string passwordRegex = @"^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$";
+            string passwordRegex = @"^(?=.*\d)(?=.*[a-zA-Z]).{6,}$";
             return Regex.IsMatch(password, passwordRegex);
         }
 
     }
     public class UserCreationResult : OperationResult
     {
-        public Person User { get; set; }
+        public UserDto User { get; set; }
         public string Token { get; set; }
     }
 }

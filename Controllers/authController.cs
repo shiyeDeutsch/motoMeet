@@ -1,6 +1,8 @@
+using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace motoMeet
 {
@@ -19,12 +21,18 @@ namespace motoMeet
         [HttpPost("login")]
         public async Task<IActionResult> Auth([FromBody] LoginModel model)
         {
+            UserDto useDto;
             Console.WriteLine(model.Email + "  " + model.Password);
             try
             {
                 var authResult = await _authManager.Authenticate(model.Email, model.Password);
                 if (authResult.IsSuccess)
-                    return Ok(new { jwt = authResult.Token, user = _userManager.GetUserData(model.Email) });
+                {
+                    useDto = await _userManager.GetUserData(model.Email);
+                    useDto.Token = authResult.Token;
+                    return Ok(new { user = useDto });
+                }
+
                 return Unauthorized(authResult.ErrorMessage);
             }
             catch (Exception ex)
@@ -48,8 +56,32 @@ namespace motoMeet
                 return BadRequest(new { ErrorMessage = userResult.ErrorMessage });
         }
 
-    
-    
+        [HttpGet("verify")]
+        public async Task<IActionResult> VerifyToken(string token, int userId)
+        {
+            try
+            {
+                var result = await _authManager.ValidateToken(token, userId);
+                if (result)
+
+                {
+                    var htmlContent = System.IO.File.ReadAllText("C:/src/.net core/motoMeet/Views/VerificationSuccess.html");
+                    return new ContentResult
+                    {
+                        ContentType = "text/html",
+                        StatusCode = (int)HttpStatusCode.OK,
+                        Content = htmlContent
+                    };
+                }
+                else
+                    return BadRequest("Invalid or expired token.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ErrorMessage = $"An error occurred: {ex.Message}" });
+            }
+        }
+
 
     }
 

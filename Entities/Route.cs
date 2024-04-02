@@ -12,7 +12,7 @@ namespace motoMeet
         public string Description { get; set; }
         public Point StartPoint { get; set; }
         public Point EndPoint { get; set; }
-        public int DifficultyLevelID { get; set; }
+        public int DifficultyLevelId { get; set; }
         public List<RoutesTypes> RouteTypes { get; set; }
         public double Length { get; set; }
         public TimeSpan Duration { get; set; }
@@ -23,6 +23,23 @@ namespace motoMeet
         public virtual ICollection<RouteTag> RouteTags { get; set; }
         //Accessibility: String - Information about accessibility (e.g., "wheelchair accessible", "no motor vehicles").
         //Status: Enum - Current status of the route (e.g., Open, Closed, Under Maintenance).
+    }
+    public class NewRouteModel
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public Point StartPoint { get; set; }
+        public Point EndPoint { get; set; }
+        public RouteType RouteType { get; set; }
+        public double Length { get; set; }
+        public TimeSpan Duration { get; set; }
+        // public DifficultyLevel DifficultyLevel { get; set; }
+        public List<Point> RoutePoints { get; set; }
+        public List<RouteTag> RouteTags { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsCompleted { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 
     public class RoutePoint : EntityBase
