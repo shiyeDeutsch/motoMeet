@@ -39,10 +39,48 @@ namespace motoMeet.Manager
             }
         }
 
-        public async Task<Route> CreateRoute(NewRouteModel newRoute)
+        public async Task<Route?> CreateRoute(NewRouteModel newRouteModel)
         {
- ///  gpt please imploment here!!
-        }
-    }
+            // Convert NewRouteModel to Route entity
+            var route = new Route
+            {
+                AddedBy = newRouteModel.AddedBy,
+                Name = newRouteModel.Name,
+                Description = newRouteModel.Description,
+                StartPoint = newRouteModel.StartPoint,
+                EndPoint = newRouteModel.EndPoint,
+                Length = newRouteModel.Length,
+                Duration = newRouteModel.Duration,
+                RoutePoints = newRouteModel.RoutePoints.Select((p, index) => new RoutePoint
+                {
+                    SequenceNumber = index,
+                    Point = p,
+                }).ToList()
+            };
 
+            // Add the Route entity to the DbContext and save to generate its ID
+            var createdRoute = await _routeService.CreateRoute(route);
+            return createdRoute;
+        }
+        //     if (createdRoute != null)
+
+        //     {
+        //         var routePoints = newRouteModel.RoutePoints.Select((point, index) => new RoutePoint
+        //         {
+        //             SequenceNumber = index,
+        //             RouteId = route.Id, // Use generated ID
+        //             Point = point,
+        //             // Set other RoutePoint properties as necessary...
+        //         }).ToList();
+
+        //         // Use the new AddRangeAsync method to batch insert points
+        //    //     await _routeService.AddPointsToRoute(route.Id, routePoints);
+        //     //    await _routeService.AddTagsToRoute(route.Id, newRouteModel.RouteTagsIds);
+
+        //         return route;
+        //     }
+        //     return null;
+        // }
+
+    }
 }

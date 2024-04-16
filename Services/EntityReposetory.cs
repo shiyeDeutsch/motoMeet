@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 
 namespace motoMeet
@@ -16,8 +17,8 @@ namespace motoMeet
         // Task DeleteByIdAsync(int id);
         //Task BulkInsertAsync(IEnumerable<T> entities);
         Task<T> FindFirstByExpressionAsync(Expression<Func<T, bool>> expression);
-
-
+        Task AddRangeAsync(IEnumerable<T> entities);
+        Task<IEnumerable<T>> GetByIdsAsync(IEnumerable<int> ids);
     }
 
     public class Repository<T> : IRepository<T> where T : class
@@ -75,7 +76,10 @@ namespace motoMeet
 
         }
 
-
+        public async Task AddRangeAsync(IEnumerable<T> entities)
+        {
+            await _dbSet.AddRangeAsync(entities);
+        }
         public async Task ReloadAsync(T entity)
         {
             await _dbSet.Entry(entity).ReloadAsync();
@@ -85,6 +89,51 @@ namespace motoMeet
         {
             return await _dbSet.FirstOrDefaultAsync(expression);
         }
+
+        public async Task<IEnumerable<T>> GetByIdsAsync(IEnumerable<int> ids)
+        {
+            // Ensure the TEntity has an 'Id' property of type int
+            var entityType = typeof(T);
+            var idProperty = entityType.GetProperty("Id");
+            if (idProperty == null || idProperty.PropertyType != typeof(int))
+            {
+                throw new InvalidOperationException($"Entity {entityType.Name} does not have an 'Id' property of type int.");
+            }
+
+            // Dynamically build the lambda expression e => ids.Contains(e.Id)
+            var parameter = Expression.Parameter(entityType, "e");
+            var propertyAccess = Expression.MakeMemberAccess(parameter, idProperty);
+            var constant = Expression.Constant(ids);
+            var containsMethod = typeof(Enumerable).GetMethods(BindingFlags.Static | BindingFlags.Public)
+                .First(m => m.Name == "Contains" && m.GetParameters().Length == 2)
+                .MakeGenericMethod(typeof(int));
+            var containsExpression = Expression.Call(containsMethod, constant, propertyAccess);
+
+            var lambda = Expression.Lambda<Func<T, bool>>(containsExpression, parameter);
+
+            // Use the dynamically built lambda expression in the query
+            return await _dbSet.Where(lambda).ToListAsync();
+        }
+
+
+        private TProperty GetPropertyValue<T, TProperty>(T entity, string propertyName)
+        {
+            var entityType = typeof(T);
+            var propertyInfo = entityType.GetProperty(propertyName);
+            if (propertyInfo == null)
+            {
+                throw new InvalidOperationException($"Entity of type {entityType.Name} does not have a property named '{propertyName}'.");
+            }
+            var value = propertyInfo.GetValue(entity);
+            if (value is TProperty typedValue)
+            {
+                return typedValue;
+            }
+            throw new InvalidOperationException($"The property '{propertyName}' on entity type {entityType.Name} is not of type {typeof(TProperty).Name}.");
+        }
+
+
+
 
 
     }

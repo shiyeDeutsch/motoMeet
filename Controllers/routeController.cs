@@ -38,15 +38,26 @@ namespace motoMeet
 
             return Ok(route);
         }
-
         // POST: api/Routes
         [HttpPost]
-        public async Task<ActionResult<Route>> CreateRoute([FromBody] NewRouteModel route)
+        public async Task<ActionResult<Route>> CreateRoute([FromBody] NewRouteModel routesdfgas)
         {
-            await _routeManager.CreateRoute(route);
+            // Console.Write("request get in");
+            // try
+            // {
+                var createdRoute = await _routeManager.CreateRoute(routesdfgas);
 
-        //    return CreatedAtAction(nameof(GetRoute), new { id = route.ID }, route);
+                // Assuming 'GetRoute' is an existing method that can fetch a route by its ID
+                // and that 'createdRoute.Id' holds the ID of the newly created route.
+                return CreatedAtAction(nameof(GetRoute), new { id = createdRoute.Id }, createdRoute);
+            // }
+            // catch (Exception ex)
+            // {
+            //     // Consider logging the exception details here
+            //     return StatusCode(500, "An error occurred while creating the route.");
+            // }
         }
+
 
         // POST: api/Routes/5/Points
         // [HttpPost("{id}/Points")]

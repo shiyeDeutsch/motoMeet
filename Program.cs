@@ -4,13 +4,27 @@ using Microsoft.IdentityModel.Tokens;
 using motoMeet;
 using motoMeet.Manager;
 
+
 using System.Text;
+
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+
+// builder.Services.AddControllersWithViews()
+//        .AddNewtonsoftJson(options =>
+//        {
+//            options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+//        });
+builder.Services.AddControllers().AddJsonOptions(options =>
+    {
+
+        options.JsonSerializerOptions.Converters.Add(new NetTopologySuite.IO.Converters.GeoJsonConverterFactory());
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 //builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
@@ -21,7 +35,7 @@ builder.Services.AddScoped<IRouteService, RouteService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMailingService, MailingService>();
-builder.Services.AddScoped<IEmailService,EmailService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<UserManager>();
 builder.Services.AddScoped<RouteManager>();
 builder.Services.AddScoped<AuthManager>();
@@ -43,23 +57,23 @@ builder.Services.AddScoped<AuthManager>();
 //        };
 //    });
 
-   var key = Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"] );
-    var securityKey = new SymmetricSecurityKey(key);
+var key = Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]);
+var securityKey = new SymmetricSecurityKey(key);
 
-   builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = securityKey,
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                   ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256  }
-            };
-        });
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+     .AddJwtBearer(options =>
+     {
+         options.TokenValidationParameters = new TokenValidationParameters
+         {
+             ValidateIssuerSigningKey = true,
+             IssuerSigningKey = securityKey,
+             ValidateIssuer = false,
+             ValidateAudience = false,
+             ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 }
+         };
+     });
 
-    // Add other services...
+// Add other services...
 
 
 
@@ -93,7 +107,11 @@ builder.Services.AddScoped<AuthManager>();
 //           });
 
 
-
+// Configure logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Information);
 
 var app = builder.Build();
 

@@ -105,9 +105,9 @@ namespace motoMeet
                     Bio = user.Bio,
                     Address = user.Address,
                     PasswordHash = PasswordHash,
-                    AddedOn = DateTime.Now,
+                    AddedOn = DateTime.UtcNow,
                     IsVerified = false,
-                    CountryId=user.CountryId,
+                    CountryId = user.CountryId,
                 };
                 var newUser = await _userService.CreateUser(person);
                 var token = _authService.GenerateJwtToken(newUser);
@@ -123,7 +123,7 @@ namespace motoMeet
                     Bio = newUser.Bio,
                     Address = newUser.Address,
                     Token = token,
-                    CountryId=newUser.CountryId
+                    CountryId = newUser.CountryId
                 };
 
 
@@ -151,7 +151,7 @@ namespace motoMeet
             user.FirstName = updatedUser.FirstName;
             user.LastName = updatedUser.LastName;
             // user.RoleID = updatedUser.RoleID;
-            user.EditOn = DateTime.Now;
+            user.EditOn = DateTime.UtcNow;
             return await _userService.UpdateUser(user);
         }
 

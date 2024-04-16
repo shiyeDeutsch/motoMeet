@@ -75,10 +75,23 @@ namespace motoMeet
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<RouteTag>()
-                 .HasKey(rt => new { rt.RouteId, rt.TagId });
-            modelBuilder.Entity<RoutesTypes>()
- .HasKey(rt => new { rt.RouteId, rt.RouteTypeId });
+            modelBuilder.Entity<Route>().Property(r => r.StartPoint).HasColumnType("geography");
+            modelBuilder.Entity<Route>().Property(r => r.EndPoint).HasColumnType("geography");
+            modelBuilder.Entity<RoutePoint>().Property(r => r.Point).HasColumnType("geography");
+//             modelBuilder.Entity<RouteTag>()
+//                  .HasKey(rt => new { rt.RouteId, rt.TagId });
+//             modelBuilder.Entity<RoutesTypes>()
+//  .HasKey(rt => new { rt.RouteId, rt.RouteTypeId });
+
+// modelBuilder.Entity<RouteTag>()
+//     .HasOne(rt => rt.Route)
+//     .WithMany(r => r.RouteTags)
+//     .HasForeignKey(rt => rt.RouteId);
+
+// modelBuilder.Entity<RouteTag>()
+//     .HasOne(rt => rt.Tag)
+//     .WithMany(t => t.RouteTags)
+//     .HasForeignKey(rt => rt.TagId);
         }
         public MotoMeetDbContext(DbContextOptions<MotoMeetDbContext> options) : base(options)
         {
@@ -86,22 +99,24 @@ namespace motoMeet
         public DbSet<Person> Persons { get; set; }
         public DbSet<Route> Routes { get; set; }
         public DbSet<RoutePoint> RoutePoints { get; set; }
-        public DbSet<RouteTag> RouteTag { get; set; }
+      //  public DbSet<RouteTag> RouteTags { get; set; }
         public DbSet<Review> Review { get; set; }
         public DbSet<RouteType> RouteType { get; set; }
-        public DbSet<RoutesTypes> RoutesTypes { get; set; }
-        public DbSet<Tag> Tag { get; set; }
-        public DbSet<DifficultyLevel> DifficultyLevels { get; set; }
+        // public DbSet<RoutesTypes> RoutesTypes { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        // public DbSet<DifficultyLevel> DifficultyLevels { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+
+
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json")
                 .Build();
 
 
-            optionsBuilder.UseSqlServer(configuration.GetConnectionString("ConfigDB"), x => x.UseNetTopologySuite());
+            optionsBuilder.UseSqlServer(configuration.GetConnectionString("ConfigDB"), (x) => { x.UseNetTopologySuite(); });
 
         }
 
