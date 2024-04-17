@@ -6,6 +6,7 @@ namespace motoMeet
 {
     public interface IRepository<T> where T : class
     {
+        Task<IEnumerable<T>> Find(ISpecification<T> specification);
         Task<T> GetByIdAsync(int id);
         Task<IEnumerable<T>> GetAllAsync();
         Task<IEnumerable<T>> FindByExpressionAsync(Expression<Func<T, bool>> expression);
@@ -30,6 +31,23 @@ namespace motoMeet
         {
             _context = context;
             _dbSet = _context.Set<T>();
+        }
+
+        public async Task<IEnumerable<T>> Find(ISpecification<T> specification)
+        {
+            var query = _context.Set<T>().AsQueryable();
+
+            if (specification.Criteria != null)
+            {
+                query = query.Where(specification.Criteria);
+            }
+
+            foreach (var include in specification.Includes)
+            {
+                query = query.Include(include);
+            }
+
+            return await query.ToListAsync();
         }
 
         public async Task<T> GetByIdAsync(int id)

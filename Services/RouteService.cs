@@ -31,8 +31,9 @@ namespace motoMeet
         }
 
         public async Task<IEnumerable<Route>> GetRoutes()
-        {
-            return await _routeRepository.GetAllAsync();
+        {            return await _routeRepository.GetAllAsync();
+
+          // return await _routeRepository.Find(SpecificationFactory.RouteWithAllRoutePoints());
         }
 
         public async Task<Route> GetRoute(int id)
