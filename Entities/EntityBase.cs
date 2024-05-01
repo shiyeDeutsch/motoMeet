@@ -1,10 +1,11 @@
 namespace motoMeet
 {
-    public   interface IEntity  
+    public interface IEntity
     {
         int Id { get; set; }
     }
-     public abstract class EntityBase 
-    { 
+    public abstract class EntityBase : IEntity
+    {
+        public int Id { get; set; }
     }
 }

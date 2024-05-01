@@ -4,22 +4,24 @@ namespace motoMeet
 {
     public interface ISpecification<T>
     {
-        Expression<Func<T, bool>> Criteria { get; }
         List<Expression<Func<T, object>>> Includes { get; }
+        ISpecification<T> AddCriteria(Expression<Func<T, bool>> criteria);
+        ISpecification<T> AddInclude(Expression<Func<T, object>> includeExpression);
+        Expression<Func<T, bool>> ToExpression();
     }
 
-    public class Specification<T>
+    public class Specification<T> : ISpecification<T>
     {
         private readonly List<Expression<Func<T, bool>>> _criteria = new List<Expression<Func<T, bool>>>();
         public List<Expression<Func<T, object>>> Includes { get; } = new List<Expression<Func<T, object>>>();
 
-        public Specification<T> AddCriteria(Expression<Func<T, bool>> criteria)
+        public ISpecification<T> AddCriteria(Expression<Func<T, bool>> criteria)
         {
             _criteria.Add(criteria);
             return this;
         }
 
-        public Specification<T> AddInclude(Expression<Func<T, object>> includeExpression)
+        public ISpecification<T> AddInclude(Expression<Func<T, object>> includeExpression)
         {
             Includes.Add(includeExpression);
             return this;
@@ -35,6 +37,21 @@ namespace motoMeet
             }
 
             return combinedExpression ?? (x => true); // Return an always true expression if no criteria
+        }
+    }
+    public class GetByIdSpecification<T> : Specification<T> where T : IEntity
+    {
+        public GetByIdSpecification(int id)
+        {
+            AddCriteria(entity => entity.Id == id);
+        }
+    }
+
+    public class GetByIdsSpecification<T> : Specification<T> where T : IEntity
+    {
+        public GetByIdsSpecification(IEnumerable<int> ids)
+        {
+            AddCriteria(entity => ids.Contains(entity.Id));
         }
     }
 

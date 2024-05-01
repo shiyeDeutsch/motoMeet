@@ -35,19 +35,19 @@ namespace motoMeet
 
         public async Task<IEnumerable<T>> Find(ISpecification<T> specification)
         {
-            var query = _context.Set<T>().AsQueryable();
+            var queryable = _context.Set<T>().AsQueryable();
 
-            if (specification.Criteria != null)
+            if (specification.ToExpression() != null)
             {
-                query = query.Where(specification.Criteria);
+                queryable = queryable.Where(specification.ToExpression());
             }
 
-            foreach (var include in specification.Includes)
+            foreach (var includeExpression in specification.Includes)
             {
-                query = query.Include(include);
+                queryable = queryable.Include(includeExpression);
             }
 
-            return await query.ToListAsync();
+            return await queryable.ToListAsync();
         }
 
         public async Task<T> GetByIdAsync(int id)

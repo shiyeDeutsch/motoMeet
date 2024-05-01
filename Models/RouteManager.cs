@@ -40,10 +40,10 @@ namespace motoMeet.Manager
         }
 
         public async Task<Route?> CreateRoute(NewRouteModel newRouteModel)
-        {
+        { var routeTags=await  _routeService.GetTags(new GetByIdsSpecification<Tag>(newRouteModel.RouteTagsIds));
             // Convert NewRouteModel to Route entity
             var route = new Route
-            {
+            {Tags=routeTags,
                 AddedBy = newRouteModel.AddedBy,
                 Name = newRouteModel.Name,
                 Description = newRouteModel.Description,
@@ -57,7 +57,7 @@ namespace motoMeet.Manager
                     Point = p,
                 }).ToList()
             };
-
+         
             // Add the Route entity to the DbContext and save to generate its ID
             var createdRoute = await _routeService.CreateRoute(route);
             return createdRoute;
