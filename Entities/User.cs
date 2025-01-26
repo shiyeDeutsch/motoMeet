@@ -105,16 +105,14 @@ namespace motoMeet
         public DbSet<Person> Persons { get; set; }
         public DbSet<Route> Routes { get; set; }
         public DbSet<RoutePoint> RoutePoints { get; set; }
-      public DbSet<RouteTag> RouteTags { get; set; }
         public DbSet<Review> Review { get; set; }
         public DbSet<RouteType> RouteType { get; set; }
-          public DbSet<RoutesTypes> RoutesTypes { get; set; }
         public DbSet<Tag> Tags { get; set; }
        public DbSet<DifficultyLevel> DifficultyLevels { get; set; }
 public DbSet<UserRoute> UserRoutes { get; set; }
 public DbSet<PointOfInterest> PointsOfInterest { get; set; }
 
-DbSet<UserRoutePoint> 
+public DbSet<UserRoutePoint> UserRoutePoints { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
@@ -123,32 +121,6 @@ DbSet<UserRoutePoint>
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json")
                 .Build();
-modelBuilder.Entity<UserRoute>()
-    .HasOne(ur => ur.Person)
-    .WithMany() // or with a .WithMany(p => p.UserRoutes) if you add a collection on Person
-    .HasForeignKey(ur => ur.PersonId);
-
-modelBuilder.Entity<UserRoute>()
-    .HasOne(ur => ur.Route)
-    .WithMany() // or .WithMany(r => r.UserRoutes) if you add the inverse collection
-    .HasForeignKey(ur => ur.RouteId);
-
-modelBuilder.Entity<RoutePoint>()
-    .HasOne(rp => rp.Route)
-    .WithMany(r => r.RoutePoints)
-    .HasForeignKey(rp => rp.RouteId);
-
-    modelBuilder.Entity<UserRoutePoint>()
-    .HasOne(urp => urp.UserRoute)
-    .WithMany(ur => ur.UserRoutePoints)
-    .HasForeignKey(urp => urp.UserRouteId);
-    
-    modelBuilder.Entity<PointOfInterest>()
-    .HasOne(poi => poi.Route)
-    .WithMany(r => r.PointsOfInterest)
-    .HasForeignKey(poi => poi.RouteId)
-    .OnDelete(DeleteBehavior.Cascade);
-
             optionsBuilder.UseSqlServer(configuration.GetConnectionString("ConfigDB"), (x) => { x.UseNetTopologySuite(); });
 
         }
