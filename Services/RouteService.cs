@@ -12,28 +12,31 @@ namespace motoMeet
         Task<Route> GetRoute(int id);
         Task<Route> CreateRoute(Route route);
         Task AddPointsToRoute(int routeId, IEnumerable<RoutePoint> points);
-        Task<List<Tag>> GetTags(Specification<Tag>spec );
+        Task<List<Tag>> GetTags(Specification<Tag> spec);
+        Task UpdateRoute(Route route);
+
     }
 
     public class RouteService : IRouteService
     {
         private readonly IRepository<Route> _routeRepository;
         private readonly IRepository<RoutePoint> _pointRepository;
-      //  private readonly IRepository<RouteTag> _RouteTagRepository;
+        //  private readonly IRepository<RouteTag> _RouteTagRepository;
         private readonly IRepository<Tag> _tagRepository;
 
-        public RouteService(IRepository<Route> routeRepository, IRepository<RoutePoint> pointRepository ,IRepository<Tag> tagRepository)
+        public RouteService(IRepository<Route> routeRepository, IRepository<RoutePoint> pointRepository, IRepository<Tag> tagRepository)
         {
             _routeRepository = routeRepository;
             _pointRepository = pointRepository;
-        //    _RouteTagRepository = routeTagRepository;
+            //    _RouteTagRepository = routeTagRepository;
             _tagRepository = tagRepository;
         }
 
         public async Task<IEnumerable<Route>> GetRoutes()
-        {            return await _routeRepository.GetAllAsync();
+        {
+            return await _routeRepository.GetAllAsync();
 
-          // return await _routeRepository.Find(SpecificationFactory.RouteWithAllRoutePoints());
+            // return await _routeRepository.Find(SpecificationFactory.RouteWithAllRoutePoints());
         }
 
         public async Task<Route> GetRoute(int id)
@@ -90,9 +93,14 @@ namespace motoMeet
         //     await _RouteTagRepository.AddRangeAsync(routeTags);
         //     await _RouteTagRepository.SaveAsync();
         // }
-      public async   Task<List<Tag>> GetTags(Specification<Tag>spec )  {
+        public async Task<List<Tag>> GetTags(Specification<Tag> spec)
+        {
             return (List<Tag>)await _tagRepository.Find(spec);
         }
-
+        public async Task UpdateRoute(Route route)
+        {
+            _routeRepository.Update(route);
+            await _routeRepository.SaveAsync();
+        }
     }
 }

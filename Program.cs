@@ -39,8 +39,15 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<UserManager>();
 builder.Services.AddScoped<RouteManager>();
 builder.Services.AddScoped<AuthManager>();
+builder.Services.AddScoped<IGeocodingService, NominatimGeocodingService>();
 
-// string secretKey = builder.Configuration["JwtSettings:SecretKey"]; 
+builder.Services.AddHttpClient("Nominatim", client =>
+{
+    client.BaseAddress = new Uri("https://nominatim.openstreetmap.org/");
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; MyApp/1.0)");
+});
+
+ 
 // Console.Write (secretKey);
 // var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)); // Create SymmetricSecurityKey
 

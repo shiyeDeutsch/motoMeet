@@ -16,18 +16,19 @@ namespace motoMeet
         public string? Description { get; set; }
         public Point StartPoint { get; set; }
         public Point EndPoint { get; set; }
-        public int? DifficultyLevelId { get; set; }
-        //   public List<RoutesTypes>? RouteTypes { get; set; }
-        public RouteType? RouteTypes { get; set; }
-        public int? RouteTypeId { get; set; }
+        public virtual ICollection<RouteType> RouteTypes { get; set; }
         public double Length { get; set; }
         public TimeSpan Duration { get; set; }
         public double ElevationGain { get; set; }
         public double Rating { get; set; }
-        // public virtual DifficultyLevel ?DifficultyLevel { get; set; }
+        public int DifficultyLevelId { get; set; } // Foreign key to DifficultyLevel
+        public virtual DifficultyLevel DifficultyLevel { get; set; } // Navigation property for the DifficultyLevel
         public virtual ICollection<RoutePoint> RoutePoints { get; set; }
-        public virtual ICollection<Tag>? Tags { get; set; }
+        public virtual ICollection<Review> Reviews { get; set; } // Navigation property for the Reviews
 
+        public virtual ICollection<Tag>? Tags { get; set; }
+        public string? Country { get; set; }
+        public string? Region { get; set; }
         //Accessibility: String - Information about accessibility (e.g., "wheelchair accessible", "no motor vehicles").
         //Status: Enum - Current status of the route (e.g., Open, Closed, Under Maintenance).
     }
@@ -99,11 +100,11 @@ namespace motoMeet
         public int RouteId { get; set; }
         public int SequenceNumber { get; set; }
         public Point Point { get; set; }
-         public virtual  Route Route { get; set; }
+        public virtual Route Route { get; set; }
     }
     public class DifficultyLevel : EntityBase
     {
-        public int ID { get; set; }
+        public int Id { get; set; }
         public string Level { get; set; }
         public string Description { get; set; }
         virtual public List<Route> Routes { get; set; }
@@ -124,7 +125,7 @@ namespace motoMeet
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public Route ?Route { get; set; }
+        public virtual ICollection<Route> Routes { get; set; }
 
     }
 
@@ -144,7 +145,7 @@ namespace motoMeet
         // The keyword or tag text
 
         // Navigation property for the many-to-many relationship
-        public ICollection<Route>? Routes { get; set; }
+        public virtual ICollection<Route>? Routes { get; set; }
         //  public ICollection<RouteTag> RouteTags { get; set; } = new List<RouteTag>();
 
     }

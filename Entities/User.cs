@@ -24,7 +24,7 @@ namespace motoMeet
         public bool? IsVerified { get; set; }
         // language
         public int CountryId { get; set; }
-
+        public double TotalDistance { get; set; }
     }
     public class UserDto
     {

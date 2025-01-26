@@ -4,9 +4,17 @@ namespace motoMeet.Manager
     public class RouteManager
     {
         private readonly IRouteService _routeService;
-        public RouteManager(IRouteService routeService)
+        private readonly IGeocodingService _geocodingService;
+        private readonly IUserService _userService;
+        private readonly ILogger<RouteManager> _logger;
+        public RouteManager(IRouteService routeService, IGeocodingService geocodingService,
+        IUserService userService,
+        ILogger<RouteManager> logger)
         {
             _routeService = routeService;
+            _geocodingService = geocodingService;
+            _userService = userService;
+            _logger = logger;
         }
         public async Task<IEnumerable<Route>> GetRoutes()
         {
@@ -40,10 +48,12 @@ namespace motoMeet.Manager
         }
 
         public async Task<Route?> CreateRoute(NewRouteModel newRouteModel)
-        { var routeTags=await  _routeService.GetTags(new GetByIdsSpecification<Tag>(newRouteModel.RouteTagsIds));
+        {
+            var routeTags = await _routeService.GetTags(new GetByIdsSpecification<Tag>(newRouteModel.RouteTagsIds));
             // Convert NewRouteModel to Route entity
             var route = new Route
-            {Tags=routeTags,
+            {
+                Tags = routeTags,
                 AddedBy = newRouteModel.AddedBy,
                 Name = newRouteModel.Name,
                 Description = newRouteModel.Description,
@@ -57,9 +67,40 @@ namespace motoMeet.Manager
                     Point = p,
                 }).ToList()
             };
-         
+
             // Add the Route entity to the DbContext and save to generate its ID
             var createdRoute = await _routeService.CreateRoute(route);
+
+            // Fetch geographic details
+            try
+            {
+                var startPoint = createdRoute.StartPoint;
+                var (country, region) = await _geocodingService.GetCountryAndRegion(
+                    startPoint.Y, // Latitude
+                    startPoint.X  // Longitude
+                );
+                createdRoute.Country = country;
+                createdRoute.Region = region;
+                await _routeService.UpdateRoute(createdRoute);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Geocoding failed for route {RouteId}", createdRoute.Id);
+            }
+
+            // Update user's total distance
+            try
+            {
+                var user = await _userService.GetUser(createdRoute.AddedBy);
+                user.TotalDistance += createdRoute.Length;
+                await _userService.UpdateUser(user);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to update distance for user {UserId}", createdRoute.AddedBy);
+            }
+
+
             return createdRoute;
         }
         //     if (createdRoute != null)
