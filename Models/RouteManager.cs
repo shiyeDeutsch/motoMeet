@@ -16,112 +16,82 @@ namespace motoMeet.Manager
             _userService = userService;
             _logger = logger;
         }
-        public async Task<IEnumerable<Route>> GetRoutes()
+       
+            public async Task<Route> GetRoute(int id)
+    {
+        var route = await _routeService.GetRoute(id);
+        if (route == null)
+            throw new Exception($"No route found with ID {id}.");
+        return route;
+    }
+
+
+      public async Task<Route> CreateRouteOfficialAsync(CreateRouteRequest request)
+    {
+        // 1. Fetch tags
+        var routeTags = await _routeService.GetTags(
+            new GetByIdsSpecification<Tag>(request.RouteTagsIds)
+        );
+
+        // 2. Convert the geometry from request
+        var startPoint = ToNetTopologyPoint(request.StartPoint);
+        var endPoint   = ToNetTopologyPoint(request.EndPoint);
+        var routePoints = request.RoutePoints
+            .Select((p, i) => new RoutePoint
+            {
+                SequenceNumber = i,
+                Point = ToNetTopologyPoint(p)
+            })
+            .ToList();
+
+        // 3. Build the Route entity
+        var route = new Route
         {
-            try
-            {
-                var routes = await _routeService.GetRoutes();
-                return routes;
-            }
-            catch (Exception ex)
-            {
-                // Log the exception, re-throw it, or handle it in a way that makes sense for your application
-                throw new Exception("An error occurred while fetching the routes.", ex);
-            }
-        }
-        public async Task<Route> GetRoute(int id)
+            PersonId = request.CreatorId,  // The route’s creator
+            Name = request.Name,
+            Description = request.Description,
+            StartPoint = startPoint,
+            EndPoint = endPoint,
+            Length = request.Length,
+            Duration = request.Duration,
+
+            DifficultyLevelId = request.DifficultyLevelId,
+            RouteTypeId = request.RouteTypeId,
+
+            RoutePoints = routePoints,
+            Tags = routeTags
+        };
+
+        // 4. Create official route in DB
+        var createdRoute = await _routeService.CreateRoute(route);
+
+        // 5. Do geocoding if you want to store country/region
+        try
         {
-            try
-            {
-                var route = await _routeService.GetRoute(id);
-                if (route == null)
-                {
-                    throw new Exception($"No route found with ID {id}.");
-                }
-                return route;
-            }
-            catch (Exception ex)
-            {
-                // Log the exception, re-throw it, or handle it in a way that makes sense for your application
-                throw new Exception($"An error occurred while fetching the route with ID {id}.", ex);
-            }
+            var (country, region) = await _geocodingService.GetCountryAndRegion(
+                startPoint.Y, // latitude
+                startPoint.X  // longitude
+            );
+            createdRoute.Country = country;
+            createdRoute.Region = region;
+            await _routeService.UpdateRoute(createdRoute);
         }
-
-        public async Task<Route?> CreateRoute(NewRouteModel newRouteModel)
+        catch (Exception ex)
         {
-            var routeTags = await _routeService.GetTags(new GetByIdsSpecification<Tag>(newRouteModel.RouteTagsIds));
-            // Convert NewRouteModel to Route entity
-            var route = new Route
-            {
-                Tags = routeTags,
-                AddedBy = newRouteModel.AddedBy,
-                Name = newRouteModel.Name,
-                Description = newRouteModel.Description,
-                StartPoint = newRouteModel.StartPoint,
-                EndPoint = newRouteModel.EndPoint,
-                Length = newRouteModel.Length,
-                Duration = newRouteModel.Duration,
-                RoutePoints = newRouteModel.RoutePoints.Select((p, index) => new RoutePoint
-                {
-                    SequenceNumber = index,
-                    Point = p,
-                }).ToList()
-            };
-
-            // Add the Route entity to the DbContext and save to generate its ID
-            var createdRoute = await _routeService.CreateRoute(route);
-
-            // Fetch geographic details
-            try
-            {
-                var startPoint = createdRoute.StartPoint;
-                var (country, region) = await _geocodingService.GetCountryAndRegion(
-                    startPoint.Y, // Latitude
-                    startPoint.X  // Longitude
-                );
-                createdRoute.Country = country;
-                createdRoute.Region = region;
-                await _routeService.UpdateRoute(createdRoute);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Geocoding failed for route {RouteId}", createdRoute.Id);
-            }
-
-            // Update user's total distance
-            try
-            {
-                var user = await _userService.GetUser(createdRoute.AddedBy);
-                user.TotalDistance += createdRoute.Length;
-                await _userService.UpdateUser(user);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to update distance for user {UserId}", createdRoute.AddedBy);
-            }
-
-
-            return createdRoute;
+            _logger.LogError(ex, "Geocoding failed for route {RouteId}", createdRoute.Id);
         }
-        //     if (createdRoute != null)
 
-        //     {
-        //         var routePoints = newRouteModel.RoutePoints.Select((point, index) => new RoutePoint
-        //         {
-        //             SequenceNumber = index,
-        //             RouteId = route.Id, // Use generated ID
-        //             Point = point,
-        //             // Set other RoutePoint properties as necessary...
-        //         }).ToList();
+        // IMPORTANT: We DO NOT update user’s total distance here, because
+        // this is the official route creation, not a user traveling the route.
 
-        //         // Use the new AddRangeAsync method to batch insert points
-        //    //     await _routeService.AddPointsToRoute(route.Id, routePoints);
-        //     //    await _routeService.AddTagsToRoute(route.Id, newRouteModel.RouteTagsIds);
-
-        //         return route;
-        //     }
-        //     return null;
-        // }
-
+        return createdRoute;
+    }
+          private Point ToNetTopologyPoint(GeoPoint gp)
+    {
+        return new Point(new CoordinateZ(gp.latitude, gp.longitude, gp.altitude ?? 0.0))
+        {
+            SRID = 4326
+        };
+    }
     }
 }
