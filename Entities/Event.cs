@@ -1,5 +1,6 @@
 
-using motoMeet;
+
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace motoMeet
 {
@@ -145,7 +146,7 @@ public class Group : EntityBase
     public string? Description { get; set; }
 
   // Location can be a string or a geometry
-    public string? Location { get; set; 
+    public string? Location { get; set; }
 
     // Privacy settings: public, private, or hidden
     public bool IsPublic { get; set; }

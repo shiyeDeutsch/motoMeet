@@ -1,4 +1,6 @@
-namespace motoMeet.Manager
+using NetTopologySuite.Geometries;
+
+namespace motoMeet
 {
 
     public class RouteManager
@@ -68,7 +70,7 @@ namespace motoMeet.Manager
         // 5. Do geocoding if you want to store country/region
         try
         {
-            var (country, region) = await _geocodingService.GetCountryAndRegion(
+            (string country, string region) = await _geocodingService.GetCountryAndRegion(
                 startPoint.Y, // latitude
                 startPoint.X  // longitude
             );
@@ -94,4 +96,9 @@ namespace motoMeet.Manager
         };
     }
     }
+    public interface IRouteManager
+{
+    Task<Route> GetRoute(int id);
+    Task<Route> CreateRouteOfficialAsync(CreateRouteRequest request);
+}
 }

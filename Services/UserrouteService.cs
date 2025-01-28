@@ -1,4 +1,4 @@
-public interface IUserRouteService
+ namespace motoMeet{public interface IUserRouteService
 {
     Task<UserRoute> GetUserRoute(int id);
     Task<UserRoute> CreateUserRoute(UserRoute userRoute);
@@ -27,4 +27,4 @@ public class UserRouteService : IUserRouteService
         await _userRouteRepo.ReloadAsync(userRoute);
         return userRoute;
     }
-}
+}}
