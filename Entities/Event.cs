@@ -1,6 +1,7 @@
 
 
 using System.ComponentModel.DataAnnotations.Schema;
+using NetTopologySuite.Geometries;
 
 namespace motoMeet
 {
@@ -13,10 +14,7 @@ namespace motoMeet
     public bool IsPublic { get; set; }
     public bool RequiresApproval { get; set; }
 
-    // The route if it’s tied directly to one route
-    public int? RouteId { get; set; }
-    public virtual Route Route { get; set; }
-
+ 
     public int CreatorId { get; set; }
     public virtual Person Creator { get; set; }
 
@@ -105,22 +103,35 @@ public class EventParticipant : EntityBase
 public class EventStage : EntityBase
 {
     public int Id { get; set; }
+
     public int EventId { get; set; }
     public virtual Event Event { get; set; }
 
     public string Title { get; set; }
     public string? Description { get; set; }
 
-    // Start date/time for this stage
     public DateTime? StageStartTime { get; set; }
 
-    // Possibly link a route to each stage (instead of entire event)
+    // If this stage references an existing Route
     public int? RouteId { get; set; }
     public virtual Route Route { get; set; }
 
-    // If you want to track if stage is a game, rest area, etc.
-    public string? StageType { get; set; }
+    // The type of this stage
+    public EventStageType StageType { get; set; }
+
+    // Optional: for e.g. a single coordinate if it’s a meeting point.
+    public Point? Location { get; set; }
 }
+
+public enum EventStageType
+{
+    RouteSegment,    // A stage that references a Route
+    MeetingPoint,    // A stage with a single coordinate or place
+    OvernightStop,   // E.g. camping, lodging
+    LunchStop,       // Another specific stop type
+    Activity         // A custom activity that doesn’t necessarily have a route
+}
+
 
 public class PersonFollow : EntityBase
 {

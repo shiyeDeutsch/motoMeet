@@ -122,6 +122,15 @@ namespace motoMeet
 //     .WithMany(t => t.RouteTags)
 //     .HasForeignKey(rt => rt.TagId);
 
+
+  modelBuilder
+        .Entity<EventStage>()
+        .Property(es => es.StageType)
+        .HasConversion<string>(); // store enum as string
+ modelBuilder
+        .Entity<PointOfInterest>()
+        .Property(poi => poi.WaypointType)
+        .HasConversion<string>();
 modelBuilder.Entity<EventActivity>()
     .HasKey(ea => new { ea.EventId, ea.ActivityTypeId });
 
