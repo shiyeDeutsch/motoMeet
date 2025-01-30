@@ -40,6 +40,71 @@ namespace motoMeet
           public virtual ICollection<EventActivity> EventActivities { get; set; }
         = new List<EventActivity>();
 }
+public class EventStage : EntityBase
+{
+    public int Id { get; set; }
+
+    public int EventId { get; set; }
+    public virtual Event Event { get; set; }
+
+    public string Title { get; set; }
+    public string? Description { get; set; }
+
+    public DateTime? StageStartTime { get; set; }
+    public int? RouteId { get; set; }
+    public virtual Route Route { get; set; }
+
+    public EventStageType StageType { get; set; }
+    public Point? Location { get; set; }
+
+    // For clarity:
+    public virtual ICollection<EventStageParticipant> StageParticipants { get; set; }
+      = new List<EventStageParticipant>();
+}
+
+public class EventParticipant : EntityBase
+{
+    public int Id { get; set; }
+
+    public int EventId { get; set; }
+    public virtual Event Event { get; set; }
+
+    public int PersonId { get; set; }
+    public virtual Person Person { get; set; }
+
+    public bool IsApproved { get; set; }
+    public bool IsActive { get; set; }
+    public DateTime JoinedOn { get; set; }
+
+    // List of stages the participant is engaged in
+    public virtual ICollection<EventStageParticipant> StageParticipants { get; set; }
+      = new List<EventStageParticipant>();
+}
+
+public class EventStageParticipant : EntityBase
+{
+    public int Id { get; set; }
+
+    // Link to the "stage" 
+    public int EventStageId { get; set; }
+    public virtual EventStage EventStage { get; set; }
+
+    // Link to the participant (the user in the event)
+    public int EventParticipantId { get; set; }
+    public virtual EventParticipant EventParticipant { get; set; }
+
+    // If the user logs a personal usage (UserRoute) for the route associated with this stage
+    public int? UserRouteId { get; set; }
+    public virtual UserRoute UserRoute { get; set; }
+
+    // Additional details for stage-level participation
+    // e.g. times, statuses, did they skip, etc.
+    public DateTime? StartedAt { get; set; }
+    public DateTime? FinishedAt { get; set; }
+    public bool IsCompleted { get; set; }
+}
+
+
 public class ActivityType : EntityBase
 {
     public int Id { get; set; }
@@ -68,26 +133,6 @@ public class EventActivity
     public virtual ActivityType ActivityType { get; set; }
 }
 
-public class EventParticipant : EntityBase
-{
-    public int Id { get; set; }
-
-    public int EventId { get; set; }
-    public virtual Event Event { get; set; }
-
-    public int PersonId { get; set; }
-    public virtual Person Person { get; set; }
-
-    // If the event is linked to a route, each participant might have a userRoute
-    public int? UserRouteId { get; set; }
-    public virtual UserRoute UserRoute { get; set; }
-
-    // Some approval or status
-    public bool IsApproved { get; set; }
-    public bool IsActive { get; set; }
-
-    public DateTime JoinedOn { get; set; }
-}
 
     public class EventItem : EntityBase
 {
@@ -100,29 +145,7 @@ public class EventParticipant : EntityBase
     public bool IsAssigned { get; set; } 
 }
 
-public class EventStage : EntityBase
-{
-    public int Id { get; set; }
-
-    public int EventId { get; set; }
-    public virtual Event Event { get; set; }
-
-    public string Title { get; set; }
-    public string? Description { get; set; }
-
-    public DateTime? StageStartTime { get; set; }
-
-    // If this stage references an existing Route
-    public int? RouteId { get; set; }
-    public virtual Route Route { get; set; }
-
-    // The type of this stage
-    public EventStageType StageType { get; set; }
-
-    // Optional: for e.g. a single coordinate if it’s a meeting point.
-    public Point? Location { get; set; }
-}
-
+ 
 public enum EventStageType
 {
     RouteSegment,    // A stage that references a Route

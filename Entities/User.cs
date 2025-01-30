@@ -155,6 +155,20 @@ modelBuilder.Entity<GroupActivity>()
     .HasOne(ga => ga.ActivityType)
     .WithMany(at => at.GroupActivities)
     .HasForeignKey(ga => ga.ActivityTypeId);
+       modelBuilder.Entity<EventStageParticipant>()
+        .HasOne(esp => esp.EventStage)
+        .WithMany(es => es.StageParticipants)
+        .HasForeignKey(esp => esp.EventStageId);
+
+    modelBuilder.Entity<EventStageParticipant>()
+        .HasOne(esp => esp.EventParticipant)
+        .WithMany(ep => ep.StageParticipants)
+        .HasForeignKey(esp => esp.EventParticipantId);
+
+    modelBuilder.Entity<EventStageParticipant>()
+        .HasOne(esp => esp.UserRoute)
+        .WithMany()  // or with .WithMany(ur => ur.EventStageParticipants) if you want a back-collection
+        .HasForeignKey(esp => esp.UserRouteId);
 
         }
         public MotoMeetDbContext(DbContextOptions<MotoMeetDbContext> options) : base(options)

@@ -42,5 +42,61 @@ public class CreateUserRouteRequest
     public List<GeoPoint> UserPoints { get; set; } 
         = new List<GeoPoint>();  // user’s actual GPS track if needed
 }
+public class CreateEventRequest
+{
+    public string Name { get; set; }
+    public string? Description { get; set; }
+    
+    public bool IsPublic { get; set; }
+    public bool RequiresApproval { get; set; }
+    
+    public int CreatorId { get; set; } // the user who creates the event
+    
+    public DateTime StartDateTime { get; set; }
+    public DateTime? EndDateTime { get; set; }
+
+    public int? GroupId { get; set; }
+
+    // Optional list of stages to create immediately
+    public List<CreateEventStageRequest>? Stages { get; set; } 
+        = new List<CreateEventStageRequest>();
+}
+public class CreateEventStageRequest
+{
+    public string Title { get; set; }
+    public string? Description { get; set; }
+    
+    public DateTime? StageStartTime { get; set; }
+
+    // If this stage references an existing Route (RouteId)
+    public int? RouteId { get; set; }
+
+    // The stage type (RouteSegment, MeetingPoint, etc.)
+    public EventStageType StageType { get; set; }
+
+    // If this is a meeting point, you can store lat/lon
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
+    public double? Altitude { get; set; }
+}
+public class JoinEventRequest
+{
+    public int PersonId { get; set; }
+    // Additional data if needed, e.g. a custom message
+}
+
+public class StageParticipationRequest
+{
+    public int EventId { get; set; }
+    public int StageId { get; set; }
+    public int PersonId { get; set; }
+}
+
+public class JoinStageRequest
+{
+    public int PersonId { get; set; }
+    public DateTime StartedAt { get; set; } = DateTime.UtcNow;
+    // Possibly other fields if needed
+}
 
 }
