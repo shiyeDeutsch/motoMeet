@@ -182,7 +182,7 @@ namespace motoMeet
     // ---------------- Notification, Reaction, Favorite ----------------
     modelBuilder.Entity<Notification>()
         .HasOne(n => n.Recipient)
-        .WithMany() // Optionally add a collection navigation on Person
+        .WithMany(p=>p.NotificationsReceived) // Optionally add a collection navigation on Person
         .HasForeignKey(n => n.RecipientId)
         .OnDelete(DeleteBehavior.Cascade);
     modelBuilder.Entity<Notification>()
@@ -193,13 +193,13 @@ namespace motoMeet
 
     modelBuilder.Entity<Reaction>()
         .HasOne(r => r.Person)
-        .WithMany() // Optionally add a collection navigation on Person
+        .WithMany(p=>p.Reactions) // Optionally add a collection navigation on Person
         .HasForeignKey(r => r.PersonId)
         .OnDelete(DeleteBehavior.Cascade);
 
     modelBuilder.Entity<Favorite>()
         .HasOne(f => f.Person)
-        .WithMany() // Optionally add a collection navigation on Person
+        .WithMany(p=>p.Favorites) // Optionally add a collection navigation on Person
         .HasForeignKey(f => f.PersonId)
         .OnDelete(DeleteBehavior.Cascade);
 
@@ -214,7 +214,7 @@ namespace motoMeet
     // UserRoute: relationships with Person and Route
     modelBuilder.Entity<UserRoute>()
         .HasOne(ur => ur.Person)
-        .WithMany()  // Optionally add a navigation property on Person
+        .WithMany(p=>p.UserRoutes)  // Optionally add a navigation property on Person
         .HasForeignKey(ur => ur.PersonId)
         .OnDelete(DeleteBehavior.Cascade);
     modelBuilder.Entity<UserRoute>()
@@ -226,7 +226,7 @@ namespace motoMeet
     // ---------------- Event and Its Child Entities ----------------
     modelBuilder.Entity<Event>()
         .HasOne(e => e.Creator)
-        .WithMany() // Optionally add a collection navigation on Person (e.g. CreatedEvents)
+        .WithMany(p=>p.CreatedEvents) // Optionally add a collection navigation on Person (e.g. CreatedEvents)
         .HasForeignKey(e => e.CreatorId)
         .OnDelete(DeleteBehavior.Restrict);
     modelBuilder.Entity<Event>()
@@ -269,9 +269,8 @@ namespace motoMeet
         .OnDelete(DeleteBehavior.Cascade);
     modelBuilder.Entity<EventStageParticipant>()
         .HasOne(esp => esp.UserRoute)
-        .WithMany() // No navigation property assumed on UserRoute
-        .HasForeignKey(esp => esp.UserRouteId)
-        .OnDelete(DeleteBehavior.SetNull);
+        .WithOne(ur=>ur.EventStageParticipant) // No navigation property assumed on UserRoute
+   .HasForeignKey<UserRoute>(ur => ur.EventStageParticipantId)        .OnDelete(DeleteBehavior.SetNull);
 
     modelBuilder.Entity<EventItem>()
         .HasOne(ei => ei.Event)
@@ -293,7 +292,7 @@ namespace motoMeet
         .OnDelete(DeleteBehavior.Cascade);
     modelBuilder.Entity<GroupMember>()
         .HasOne(gm => gm.Person)
-        .WithMany() // Optionally add a navigation property on Person
+        .WithMany(p=>p.GroupMemberships) // Optionally add a navigation property on Person
         .HasForeignKey(gm => gm.PersonId)
         .OnDelete(DeleteBehavior.Cascade);
 
