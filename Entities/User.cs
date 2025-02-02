@@ -167,8 +167,8 @@ namespace motoMeet
 
             modelBuilder.Entity<EventStageParticipant>()
                 .HasOne(esp => esp.UserRoute)
-                .HasOne(ur>ur.EventStageParticipant)  // or with .WithMany(ur => ur.EventStageParticipants) if you want a back-collection
-                .HasForeignKey(esp => esp.UserRouteId);
+                .WithOne(ur=>ur.EventStageParticipant)  // or with .WithMany(ur => ur.EventStageParticipants) if you want a back-collection
+                .HasForeignKey<EventStageParticipant>(esp => esp.UserRouteId);  
 
  
 
