@@ -97,6 +97,8 @@ namespace motoMeet
         public TimeSpan? Duration { get; set; }      // user’s time on the route
         public double? Distance { get; set; }        // user’s measured distance
         public double? ElevationGain { get; set; }   // user’s measured elevation gain
+public int?EventStageParticipantId { get; set; }
+        public virtual EventStageParticipant EventStageParticipant { get; set; }                        
 
 
         public virtual ICollection<UserRoutePoint> UserRoutePoints { get; set; }
