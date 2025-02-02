@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace motoMeet
 {
     [ApiController]
-[Route("api/[controller]")]
+[Route("api/routes")]
 public class RoutesController : ControllerBase
 {
-    private readonly IRouteManager _routeManager;
+    private readonly RouteManager _routeManager;
 
-    public RoutesController(IRouteManager routeManager)
+    public RoutesController(RouteManager routeManager)
     {
         _routeManager = routeManager;
     }

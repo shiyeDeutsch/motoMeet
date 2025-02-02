@@ -32,13 +32,16 @@ builder.Services.AddDbContext<MotoMeetDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ConfigDB")));
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IRouteService, RouteService>();
+builder.Services.AddScoped<IUserRouteService, UserRouteService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMailingService, MailingService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<UserManager>();
 builder.Services.AddScoped<RouteManager>();
+builder.Services.AddScoped<UserRouteManager>();
 builder.Services.AddScoped<AuthManager>();
+builder.Services.AddScoped<EventManager>();
 builder.Services.AddScoped<IGeocodingService, NominatimGeocodingService>();
 
 builder.Services.AddHttpClient("Nominatim", client =>
@@ -47,7 +50,8 @@ builder.Services.AddHttpClient("Nominatim", client =>
     client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; MyApp/1.0)");
 });
 
- 
+ // Add SignalR services
+builder.Services.AddSignalR();
 // Console.Write (secretKey);
 // var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)); // Create SymmetricSecurityKey
 
@@ -136,7 +140,7 @@ app.UseRouting();  // add this
 app.UseAuthentication(); // this should be before UseAuthorization
 
 app.UseAuthorization();
-
+app.MapHub<EventHub>("/EventHub");
 app.MapControllers();
 
 app.Run();

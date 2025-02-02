@@ -1,4 +1,6 @@
 
+using NetTopologySuite.Geometries;
+
 namespace motoMeet
 {
 public interface IEventManager
@@ -92,7 +94,7 @@ public class EventManager : IEventManager
         if (person == null) throw new Exception($"Person {request.PersonId} not found.");
 
         // Check if already participating
-        var existing = await _participantRepo.FirstOrDefaultAsync(
+        var existing = await _participantRepo.FindFirstByExpressionAsync(
             p => p.EventId == eventId && p.PersonId == request.PersonId
         );
         if (existing != null)
@@ -122,7 +124,7 @@ public class EventManager : IEventManager
             throw new Exception("Stage does not belong to the specified event.");
 
         // 2. Check if user is an event participant
-        var participant = await _participantRepo.FirstOrDefaultAsync(
+        var participant = await _participantRepo.FindFirstByExpressionAsync(
             p => p.EventId == eventId && p.PersonId == request.PersonId
         );
         if (participant == null)
