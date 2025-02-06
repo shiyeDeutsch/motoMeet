@@ -28,9 +28,13 @@ namespace motoMeet
                 var authResult = await _authManager.Authenticate(model.Email, model.Password);
                 if (authResult.IsSuccess)
                 {
-                    useDto = await _userManager.GetUserData(model.Email);
-                    useDto.Token = authResult.Token;
-                    return Ok(new { user = useDto });
+                    // Get the full user data including related routes, groups, etc.
+        var userDto = await _userManager.GetFullUserData(model.Email);
+        userDto.Token = authResult.Token;  // attach the token
+
+        // Optionally, if you want to separately return additional data that isn’t part of the user DTO,
+        // you could do so here. But with the above mapping, all data is already in userDto.
+        return Ok(userDto);
                 }
 
                 return Unauthorized(authResult.ErrorMessage);

@@ -155,14 +155,29 @@ namespace motoMeet
             return await _userService.UpdateUser(user);
         }
 
-        public async Task<UserDto> GetUserData(string email)
+       /// <summary>
+    /// Loads the Person (with navigation properties) and maps to a full UserDto.
+    /// </summary>
+    public async Task<UserDto> GetFullUserData(string email)
+    {
+        // Ideally, ensure that your _userService includes the necessary related data.
+        var person = await _userService.FindFirstByExpression(p => p.Email == email);
+        if (person == null)
         {
-            var user = await _userService.FindFirstByExpression(p => p.Email == email);
-
-            var userDto = new UserDto(user);
-            return userDto;
+            throw new Exception("User not found.");
         }
 
+        // Map the Person entity to UserDto (including nested routes, groups, etc.)
+        var userDto = new UserDto(person);
+
+        // Optionally, if you need to add events the user is participating in,
+        // load them from your EventManager and set userDto.ParticipatedEvents here.
+        // Example:
+        // var events = await _eventManager.GetEventsForUser(person.Id);
+        // userDto.ParticipatedEvents = events.Select(e => new EventDto(e)).ToList();
+
+        return userDto;
+    }
 
         private bool validateEmail(string email)
         {
