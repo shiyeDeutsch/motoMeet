@@ -134,6 +134,10 @@ public int?EventStageParticipantId { get; set; }
         // Where is this POI located?
         public Point Location { get; set; }
 
+ // Link to Person
+    public int? PersonId { get; set; }
+    public virtual Person Person { get; set; }
+
         // Additional metadata
         public string ImageUrl { get; set; }
         public string Name { get; set; }
