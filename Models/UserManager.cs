@@ -158,10 +158,10 @@ namespace motoMeet
        /// <summary>
     /// Loads the Person (with navigation properties) and maps to a full UserDto.
     /// </summary>
-    public async Task<UserDto> GetFullUserData(string email)
+    public async Task<UserDto> GetFullUserData(string id)
     {
         // Ideally, ensure that your _userService includes the necessary related data.
-        var person = await _userService.FindFirstByExpression(p => p.Email == email);
+        var person = await _userService.FindFirstByExpression(p => p.id == id);
         if (person == null)
         {
             throw new Exception("User not found.");
@@ -175,7 +175,10 @@ namespace motoMeet
         // Example:
         // var events = await _eventManager.GetEventsForUser(person.Id);
         // userDto.ParticipatedEvents = events.Select(e => new EventDto(e)).ToList();
-
+        public async Task<bool> UserExists(int userId)
+        {
+            return await _userService.ExistValidation(u => u.Id == userId);
+        }
         return userDto;
     }
 

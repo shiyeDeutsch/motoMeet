@@ -6,7 +6,7 @@ namespace motoMeet
 {
     [Route("api/users")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class UsersController : AothBaseController
     {
         private readonly UserManager _userManager;
 
@@ -14,7 +14,7 @@ namespace motoMeet
         {
             _userManager = userManager;
         }
-         [Authorize]
+      //   [Authorize]
          [HttpGet]
         public async Task<IActionResult> getAll()
         {
@@ -71,7 +71,15 @@ namespace motoMeet
         //         return NotFound();
         //     }
         // }
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetUserProfile()
+        { 
 
-
+                return Ok(new
+                {
+                _userManager.GetFullUserData()
+                });
+        
+        }
     }
 }
