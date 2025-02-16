@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 
+
 namespace motoMeet
 {
     public class UserManager
@@ -127,7 +128,7 @@ namespace motoMeet
                 };
 
 
-                return new UserCreationResult { IsSuccess = true, User = userDto, Token = token };
+                return new UserCreationResult { IsSuccess = true, Result = userDto, };
             }
         }
 
@@ -155,33 +156,33 @@ namespace motoMeet
             return await _userService.UpdateUser(user);
         }
 
-       /// <summary>
-    /// Loads the Person (with navigation properties) and maps to a full UserDto.
-    /// </summary>
-    public async Task<UserDto> GetFullUserData(string id)
-    {
-        // Ideally, ensure that your _userService includes the necessary related data.
-        var person = await _userService.FindFirstByExpression(p => p.id == id);
-        if (person == null)
+        /// <summary>
+        /// Loads the Person (with navigation properties) and maps to a full UserDto.
+        /// </summary>
+        public async Task<UserDto> GetFullUserData(int id)
         {
-            throw new Exception("User not found.");
+            // Ideally, ensure that your _userService includes the necessary related data.
+            var person = await _userService.FindFirstByExpression(p => p.Id == id);
+            if (person == null)
+            {
+                throw new Exception("User not found.");
+            }
+
+            // Map the Person entity to UserDto (including nested routes, groups, etc.)
+            var userDto = new UserDto(person);
+
+            // Optionally, if you need to add events the user is participating in,
+            // load them from your EventManager and set userDto.ParticipatedEvents here.
+            // Example:
+            // var events = await _eventManager.GetEventsForUser(person.Id);
+            // userDto.ParticipatedEvents = events.Select(e => new EventDto(e)).ToList();
+
+            return userDto;
         }
-
-        // Map the Person entity to UserDto (including nested routes, groups, etc.)
-        var userDto = new UserDto(person);
-
-        // Optionally, if you need to add events the user is participating in,
-        // load them from your EventManager and set userDto.ParticipatedEvents here.
-        // Example:
-        // var events = await _eventManager.GetEventsForUser(person.Id);
-        // userDto.ParticipatedEvents = events.Select(e => new EventDto(e)).ToList();
         public async Task<bool> UserExists(int userId)
         {
             return await _userService.ExistValidation(u => u.Id == userId);
         }
-        return userDto;
-    }
-
         private bool validateEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
@@ -203,9 +204,10 @@ namespace motoMeet
         }
 
     }
-    public class UserCreationResult : OperationResult
+
+public class UserCreationResult : OperationResult<UserDto>
     {
-        public UserDto User { get; set; }
-        public string Token { get; set; }
+
+    
     }
 }

@@ -14,7 +14,7 @@ namespace motoMeet
         {
             _userManager = userManager;
         }
-        protected async Task<Guid?> GetUserIdAsync( )
+        protected async Task<int?> GetUserIdAsync( )
         {
             try
             {
@@ -25,14 +25,14 @@ namespace motoMeet
                     return null;
                 }
 
-                if (!Guid.TryParse(userIdString, out var userId))
+                if (!int.TryParse(userIdString, out var userId))
                 {
                     return null;
                 }
 
                 var user = await _userManager.UserExists(userId);
 
-                return user != null ? userId : null;
+                return user != null ? userId : (int?)null;
             }
             catch
             {

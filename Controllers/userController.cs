@@ -8,14 +8,15 @@ namespace motoMeet
     [ApiController]
     public class UsersController : AothBaseController
     {
-        private readonly UserManager _userManager;
+         private readonly UserManager _userManager;
 
-        public UsersController(UserManager userManager)
+        public UsersController(UserManager userManager) : base(userManager)
         {
+         
             _userManager = userManager;
         }
-      //   [Authorize]
-         [HttpGet]
+        //   [Authorize]
+        [HttpGet]
         public async Task<IActionResult> getAll()
         {
             var users = await _userManager.GetUsers();
@@ -37,7 +38,7 @@ namespace motoMeet
         }
 
         // POST: api/users
-         
+
         // [HttpPost]
         // public async Task<IActionResult> create([FromBody]  user)
         // {
@@ -73,13 +74,15 @@ namespace motoMeet
         // }
         [HttpGet("profile")]
         public async Task<IActionResult> GetUserProfile()
-        { 
+        {
+            var userId = await GetUserIdAsync( );
 
-                return Ok(new
-                {
-                _userManager.GetFullUserData()
-                });
-        
+            if (userId == null)
+            {
+                return Unauthorized(new { message = "Invalid token" });
+            }
+
+            return Ok(new { user = _userManager.GetFullUserData(userId.Value) });
         }
     }
 }

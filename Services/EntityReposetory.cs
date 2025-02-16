@@ -155,10 +155,18 @@ namespace motoMeet
 
 
     }
-    public class OperationResult
+    public interface IOperationResult<T>
+    {
+        bool IsSuccess { get; set; }
+        string ErrorMessage { get; set; }
+        T Result { get; set; }
+    }
+
+    public class OperationResult<T> : IOperationResult<T>
     {
         public bool IsSuccess { get; set; }
-        public string ErrorMessage { get; set; }
+        public string? ErrorMessage { get; set; }
+        public T Result { get; set; }
     }
 
 }

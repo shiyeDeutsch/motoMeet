@@ -192,7 +192,7 @@ namespace motoMeet
 
     }
 
-    public class AuthenticationResult : OperationResult
+    public class AuthenticationResult : OperationResult<T> 
     {
         public string Token { get; set; }
     }

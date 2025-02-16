@@ -53,9 +53,13 @@ namespace motoMeet
         }
 
     }
-    public class SendingEmailResult : OperationResult
+    public class SendingEmailResult : OperationResult<T> 
     {
 
+    }
+
+    public class T
+    {
     }
 }
 
