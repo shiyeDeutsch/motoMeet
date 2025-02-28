@@ -88,5 +88,229 @@ namespace motoMeet
                 return BadRequest(ex.Message);
             }
         }
+        
+        // 6) Get events with filtering
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Event>>> GetEvents([FromQuery] EventFilterRequest request)
+        {
+            try
+            {
+                var events = await _eventManager.GetEventsAsync(request);
+                return Ok(events);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // 7) Update an event
+        [HttpPut("{eventId}")]
+        public async Task<ActionResult> UpdateEvent(int eventId, [FromBody] UpdateEventRequest request)
+        {
+            try
+            {
+                var success = await _eventManager.UpdateEventAsync(eventId, request);
+                if (success)
+                    return NoContent();
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // 8) Delete an event
+        [HttpDelete("{eventId}")]
+        public async Task<ActionResult> DeleteEvent(int eventId)
+        {
+            try
+            {
+                var success = await _eventManager.DeleteEventAsync(eventId);
+                if (success)
+                    return NoContent();
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // 9) Cancel an event
+        [HttpPost("{eventId}/cancel")]
+        public async Task<ActionResult> CancelEvent(int eventId)
+        {
+            try
+            {
+                var success = await _eventManager.CancelEventAsync(eventId);
+                if (success)
+                    return NoContent();
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // 10) Get event participants
+        [HttpGet("{eventId}/participants")]
+        public async Task<ActionResult<IEnumerable<Person>>> GetEventParticipants(int eventId)
+        {
+            try
+            {
+                var participants = await _eventManager.GetEventParticipantsAsync(eventId);
+                return Ok(participants);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // 11) Get pending event participants
+        [HttpGet("{eventId}/pending-participants")]
+        public async Task<ActionResult<IEnumerable<Person>>> GetPendingParticipants(int eventId)
+        {
+            try
+            {
+                var pendingParticipants = await _eventManager.GetPendingParticipantsAsync(eventId);
+                return Ok(pendingParticipants);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // 12) Approve participant
+        [HttpPost("{eventId}/participants/{participantId}/approve")]
+        public async Task<ActionResult> ApproveParticipant(int eventId, int participantId)
+        {
+            try
+            {
+                var success = await _eventManager.ApproveParticipantAsync(eventId, participantId);
+                if (success)
+                    return NoContent();
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // 13) Reject participant
+        [HttpPost("{eventId}/participants/{participantId}/reject")]
+        public async Task<ActionResult> RejectParticipant(int eventId, int participantId)
+        {
+            try
+            {
+                var success = await _eventManager.RejectParticipantAsync(eventId, participantId);
+                if (success)
+                    return NoContent();
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // 14) Remove participant
+        [HttpDelete("{eventId}/participants/{participantId}")]
+        public async Task<ActionResult> RemoveParticipant(int eventId, int participantId)
+        {
+            try
+            {
+                var success = await _eventManager.RemoveParticipantAsync(eventId, participantId);
+                if (success)
+                    return NoContent();
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // 15) Leave event
+        [HttpPost("{eventId}/leave")]
+        public async Task<ActionResult> LeaveEvent(int eventId, [FromBody] JoinEventRequest request)
+        {
+            try
+            {
+                var success = await _eventManager.LeaveEventAsync(eventId, request.PersonId);
+                if (success)
+                    return NoContent();
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // 16) Check if user is event creator
+        [HttpGet("{eventId}/is-creator/{personId}")]
+        public async Task<ActionResult<bool>> IsEventCreator(int eventId, int personId)
+        {
+            try
+            {
+                var isCreator = await _eventManager.IsEventCreatorAsync(eventId, personId);
+                return Ok(isCreator);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // 17) Check if user is event participant
+        [HttpGet("{eventId}/is-participant/{personId}")]
+        public async Task<ActionResult<bool>> IsEventParticipant(int eventId, int personId)
+        {
+            try
+            {
+                var isParticipant = await _eventManager.IsEventParticipantAsync(eventId, personId);
+                return Ok(isParticipant);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // 18) Get event creator name
+        [HttpGet("{eventId}/creator-name")]
+        public async Task<ActionResult<string>> GetEventCreatorName(int eventId)
+        {
+            try
+            {
+                var creatorName = await _eventManager.GetEventCreatorNameAsync(eventId);
+                return Ok(creatorName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // 19) Get event participant count
+        [HttpGet("{eventId}/participant-count")]
+        public async Task<ActionResult<int>> GetEventParticipantCount(int eventId)
+        {
+            try
+            {
+                var count = await _eventManager.GetEventParticipantCountAsync(eventId);
+                return Ok(count);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace motoMeet
@@ -9,6 +11,8 @@ namespace motoMeet
         Task<EventStage> CreateEventStageAsync(EventStage stage);
         Task<EventParticipant> CreateEventParticipantAsync(EventParticipant participant);
         Task<EventStageParticipant> CreateEventStageParticipantAsync(EventStageParticipant stageParticipant);
+        Task<EventItem> CreateEventItemAsync(EventItem item);
+        Task<EventActivity> CreateEventActivityAsync(EventActivity activity);
 
         Task<Event> GetEventByIdAsync(int eventId);
         Task<EventStage> GetStageByIdAsync(int stageId);
@@ -22,6 +26,50 @@ namespace motoMeet
         /// Reloads the Event entity to include newly added child objects (e.g., Stages).
         /// </summary>
         Task ReloadEventAsync(Event ev);
+        
+        /// <summary>
+        /// Updates an existing event.
+        /// </summary>
+        Task<bool> UpdateEventAsync(Event ev);
+        
+        /// <summary>
+        /// Deletes an event.
+        /// </summary>
+        Task<bool> DeleteEventAsync(int eventId);
+        
+        /// <summary>
+        /// Gets all events with optional filtering.
+        /// </summary>
+        Task<IEnumerable<Event>> GetEventsAsync(
+            bool? isPublic = null, 
+            DateTime? fromDate = null, 
+            DateTime? toDate = null, 
+            int? creatorId = null);
+        
+        /// <summary>
+        /// Gets all participants for an event.
+        /// </summary>
+        Task<IEnumerable<EventParticipant>> GetEventParticipantsAsync(int eventId, bool? isApproved = null);
+        
+        /// <summary>
+        /// Approves a participant for an event.
+        /// </summary>
+        Task<bool> ApproveParticipantAsync(int eventId, int participantId);
+        
+        /// <summary>
+        /// Rejects a participant for an event.
+        /// </summary>
+        Task<bool> RejectParticipantAsync(int eventId, int participantId);
+        
+        /// <summary>
+        /// Removes a participant from an event.
+        /// </summary>
+        Task<bool> RemoveParticipantAsync(int eventId, int participantId);
+        
+        /// <summary>
+        /// Cancels an event.
+        /// </summary>
+        Task<bool> CancelEventAsync(int eventId);
     }
 
     public class EventService : IEventService
@@ -30,17 +78,23 @@ namespace motoMeet
         private readonly IRepository<EventStage> _stageRepo;
         private readonly IRepository<EventParticipant> _participantRepo;
         private readonly IRepository<EventStageParticipant> _stageParticipantRepo;
+        private readonly IRepository<EventItem> _eventItemRepo;
+        private readonly IRepository<EventActivity> _eventActivityRepo;
 
         public EventService(
             IRepository<Event> eventRepo,
             IRepository<EventStage> stageRepo,
             IRepository<EventParticipant> participantRepo,
-            IRepository<EventStageParticipant> stageParticipantRepo)
+            IRepository<EventStageParticipant> stageParticipantRepo,
+            IRepository<EventItem> eventItemRepo,
+            IRepository<EventActivity> eventActivityRepo)
         {
             _eventRepo = eventRepo;
             _stageRepo = stageRepo;
             _participantRepo = participantRepo;
             _stageParticipantRepo = stageParticipantRepo;
+            _eventItemRepo = eventItemRepo;
+            _eventActivityRepo = eventActivityRepo;
         }
 
         public async Task<Event> CreateEventAsync(Event ev)
@@ -70,10 +124,28 @@ namespace motoMeet
             await _stageParticipantRepo.SaveAsync();
             return stageParticipant;
         }
+        
+        public async Task<EventItem> CreateEventItemAsync(EventItem item)
+        {
+            await _eventItemRepo.AddAsync(item);
+            await _eventItemRepo.SaveAsync();
+            return item;
+        }
+        
+        public async Task<EventActivity> CreateEventActivityAsync(EventActivity activity)
+        {
+            await _eventActivityRepo.AddAsync(activity);
+            await _eventActivityRepo.SaveAsync();
+            return activity;
+        }
 
         public async Task<Event> GetEventByIdAsync(int eventId)
         {
-            return await _eventRepo.GetByIdAsync(eventId);
+            return await _eventRepo.GetByIdAsync(eventId, 
+                includes: e => e.Include(ev => ev.EventStages)
+                               .Include(ev => ev.RequiredItems)
+                               .Include(ev => ev.EventActivities)
+                               .Include(ev => ev.EventParticipants));
         }
 
         public async Task<EventStage> GetStageByIdAsync(int stageId)
@@ -91,6 +163,119 @@ namespace motoMeet
         public async Task ReloadEventAsync(Event ev)
         {
             await _eventRepo.ReloadAsync(ev);
+        }
+        
+        public async Task<bool> UpdateEventAsync(Event ev)
+        {
+            await _eventRepo.UpdateAsync(ev);
+            return await _eventRepo.SaveAsync() > 0;
+        }
+        
+        public async Task<bool> DeleteEventAsync(int eventId)
+        {
+            var ev = await _eventRepo.GetByIdAsync(eventId);
+            if (ev == null)
+                return false;
+                
+            await _eventRepo.RemoveAsync(ev);
+            return await _eventRepo.SaveAsync() > 0;
+        }
+        
+        public async Task<IEnumerable<Event>> GetEventsAsync(
+            bool? isPublic = null, 
+            DateTime? fromDate = null, 
+            DateTime? toDate = null, 
+            int? creatorId = null)
+        {
+            // Use specification pattern to build the query
+            var specification = new EventSpecification();
+            
+            if (isPublic.HasValue)
+                specification.ByIsPublic(isPublic.Value);
+                
+            if (fromDate.HasValue)
+                specification.ByStartDateFrom(fromDate.Value);
+                
+            if (toDate.HasValue)
+                specification.ByStartDateTo(toDate.Value);
+                
+            if (creatorId.HasValue)
+                specification.ByCreator(creatorId.Value);
+                
+            // Add includes for related entities
+            specification.IncludeEventStages()
+                         .IncludeRequiredItems()
+                         .IncludeEventActivities()
+                         .IncludeEventParticipants();
+            
+            // Sort by start date
+            specification.OrderByStartDateTime();
+            
+            return await _eventRepo.FindBySpecificationAsync(specification);
+        }
+        
+        public async Task<IEnumerable<EventParticipant>> GetEventParticipantsAsync(int eventId, bool? isApproved = null)
+        {
+            // Use specification pattern for participant query
+            var specification = new EventParticipantSpecification()
+                .ByEventId(eventId);
+            
+            if (isApproved.HasValue)
+                specification.ByApprovalStatus(isApproved.Value);
+                
+            return await _participantRepo.FindBySpecificationAsync(specification);
+        }
+        
+        public async Task<bool> ApproveParticipantAsync(int eventId, int participantId)
+        {
+            var participant = await _participantRepo.FindFirstByExpressionAsync(
+                p => p.Id == participantId && p.EventId == eventId
+            );
+            
+            if (participant == null)
+                return false;
+                
+            participant.IsApproved = true;
+            await _participantRepo.UpdateAsync(participant);
+            return await _participantRepo.SaveAsync() > 0;
+        }
+        
+        public async Task<bool> RejectParticipantAsync(int eventId, int participantId)
+        {
+            var participant = await _participantRepo.FindFirstByExpressionAsync(
+                p => p.Id == participantId && p.EventId == eventId
+            );
+            
+            if (participant == null)
+                return false;
+                
+            await _participantRepo.RemoveAsync(participant);
+            return await _participantRepo.SaveAsync() > 0;
+        }
+        
+        public async Task<bool> RemoveParticipantAsync(int eventId, int participantId)
+        {
+            var participant = await _participantRepo.FindFirstByExpressionAsync(
+                p => p.Id == participantId && p.EventId == eventId
+            );
+            
+            if (participant == null)
+                return false;
+                
+            await _participantRepo.RemoveAsync(participant);
+            return await _participantRepo.SaveAsync() > 0;
+        }
+        
+        public async Task<bool> CancelEventAsync(int eventId)
+        {
+            var ev = await _eventRepo.GetByIdAsync(eventId);
+            if (ev == null)
+                return false;
+                
+            // Mark as cancelled instead of deleting
+            ev.IsCancelled = true;
+            await _eventRepo.UpdateAsync(ev);
+            return await _eventRepo.SaveAsync() > 0;
         }
     }
 }
