@@ -7,6 +7,7 @@ namespace motoMeet
     {
         Task<IEnumerable<Person>> GetUsers();
         Task<Person> GetUser(int id);
+        Task<IEnumerable<Person>> GetUsersByIdsAsync(IEnumerable<int> ids);
         Task<Person> CreateUser(Person person);
         Task<Person> UpdateUser(Person user);
         Task<bool> DeleteUser(int id);
@@ -33,6 +34,12 @@ namespace motoMeet
         public async Task<Person> GetUser(int id)
         {
             return await _personRepository.GetByIdAsync(id);
+        }
+
+        public async Task<IEnumerable<Person>> GetUsersByIdsAsync(IEnumerable<int> ids)
+        {
+            var query = _personRepository.GetQuery();
+            return await query.Where(p => ids.Contains(p.Id)).ToListAsync();
         }
 
         public async Task<Person> CreateUser(Person user)

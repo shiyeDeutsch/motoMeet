@@ -1,5 +1,3 @@
-
-
 using System.ComponentModel.DataAnnotations.Schema;
 using NetTopologySuite.Geometries;
 
@@ -13,6 +11,7 @@ namespace motoMeet
 
     public bool IsPublic { get; set; }
     public bool RequiresApproval { get; set; }
+    public bool IsCancelled { get; set; } = false;
 
  
     public int CreatorId { get; set; }

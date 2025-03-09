@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using NetTopologySuite.Geometries;
 
@@ -10,9 +12,24 @@ namespace motoMeet
         Task<EventStage> AddStageAsync(int eventId, CreateEventStageRequest request);
         Task<EventParticipant> JoinEventAsync(int eventId, JoinEventRequest request);
         Task<EventStageParticipant> JoinStageAsync(int eventId, int stageId, JoinStageRequest request);
-
         Task<Event> GetEventAsync(int eventId);
         Task<EventStage> GetStageAsync(int stageId);
+        
+        // New methods to support the client-side functionality
+        Task<IEnumerable<Event>> GetEventsAsync(EventFilterRequest request);
+        Task<bool> UpdateEventAsync(int eventId, UpdateEventRequest request);
+        Task<bool> DeleteEventAsync(int eventId);
+        Task<bool> CancelEventAsync(int eventId);
+        Task<IEnumerable<Person>> GetEventParticipantsAsync(int eventId);
+        Task<IEnumerable<Person>> GetPendingParticipantsAsync(int eventId);
+        Task<bool> ApproveParticipantAsync(int eventId, int participantId);
+        Task<bool> RejectParticipantAsync(int eventId, int participantId);
+        Task<bool> RemoveParticipantAsync(int eventId, int participantId);
+        Task<bool> LeaveEventAsync(int eventId, int personId);
+        Task<bool> IsEventCreatorAsync(int eventId, int personId);
+        Task<bool> IsEventParticipantAsync(int eventId, int personId);
+        Task<string> GetEventCreatorNameAsync(int eventId);
+        Task<int> GetEventParticipantCountAsync(int eventId);
     }
 
     public class EventManager : IEventManager
@@ -60,6 +77,36 @@ namespace motoMeet
                 foreach (var stageReq in request.Stages)
                 {
                     await AddStageInternal(newEvent.Id, stageReq);
+                }
+            }
+
+            // If the request includes required items, add them
+            if (request.RequiredItems != null && request.RequiredItems.Count > 0)
+            {
+                foreach (var itemRequest in request.RequiredItems)
+                {
+                    var eventItem = new EventItem
+                    {
+                        EventId = newEvent.Id,
+                        ItemName = itemRequest.ItemName,
+                        Description = itemRequest.Description,
+                        IsAssigned = false
+                    };
+                    await _eventService.CreateEventItemAsync(eventItem);
+                }
+            }
+
+            // If the request includes activities, add them
+            if (request.EventActivities != null && request.EventActivities.Count > 0)
+            {
+                foreach (var activityRequest in request.EventActivities)
+                {
+                    var eventActivity = new EventActivity
+                    {
+                        EventId = newEvent.Id,
+                        ActivityTypeId = activityRequest.ActivityTypeId
+                    };
+                    await _eventService.CreateEventActivityAsync(eventActivity);
                 }
             }
 
@@ -141,6 +188,121 @@ namespace motoMeet
             var stage = await _eventService.GetStageByIdAsync(stageId);
             if (stage == null) throw new Exception($"EventStage {stageId} not found.");
             return stage;
+        }
+
+        public async Task<IEnumerable<Event>> GetEventsAsync(EventFilterRequest request)
+        {
+            return await _eventService.GetEventsAsync(
+                request.IsPublic,
+                request.FromDate,
+                request.ToDate,
+                request.CreatorId
+            );
+        }
+
+        public async Task<bool> UpdateEventAsync(int eventId, UpdateEventRequest request)
+        {
+            var existingEvent = await _eventService.GetEventByIdAsync(eventId);
+            if (existingEvent == null)
+                throw new Exception($"Event {eventId} not found.");
+                
+            // Check if the user is the creator
+            if (existingEvent.CreatorId != request.RequestingUserId)
+                throw new Exception("Only the event creator can update the event.");
+                
+            // Update the event properties
+            existingEvent.Name = request.Name ?? existingEvent.Name;
+            existingEvent.Description = request.Description ?? existingEvent.Description;
+            
+            if (request.IsPublic.HasValue)
+                existingEvent.IsPublic = request.IsPublic.Value;
+                
+            if (request.RequiresApproval.HasValue)
+                existingEvent.RequiresApproval = request.RequiresApproval.Value;
+                
+            if (request.StartDateTime.HasValue)
+                existingEvent.StartDateTime = request.StartDateTime.Value;
+                
+            if (request.EndDateTime.HasValue)
+                existingEvent.EndDateTime = request.EndDateTime.Value;
+                
+            return await _eventService.UpdateEventAsync(existingEvent);
+        }
+
+        public async Task<bool> DeleteEventAsync(int eventId)
+        {
+            return await _eventService.DeleteEventAsync(eventId);
+        }
+
+        public async Task<bool> CancelEventAsync(int eventId)
+        {
+            return await _eventService.CancelEventAsync(eventId);
+        }
+
+        public async Task<IEnumerable<Person>> GetEventParticipantsAsync(int eventId)
+        {
+            var participants = await _eventService.GetEventParticipantsAsync(eventId, true);
+            var personIds = participants.Select(p => p.PersonId).ToList();
+            return await _userService.GetUsersByIdsAsync(personIds);
+        }
+
+        public async Task<IEnumerable<Person>> GetPendingParticipantsAsync(int eventId)
+        {
+            var pendingParticipants = await _eventService.GetEventParticipantsAsync(eventId, false);
+            var personIds = pendingParticipants.Select(p => p.PersonId).ToList();
+            return await _userService.GetUsersByIdsAsync(personIds);
+        }
+
+        public async Task<bool> ApproveParticipantAsync(int eventId, int participantId)
+        {
+            return await _eventService.ApproveParticipantAsync(eventId, participantId);
+        }
+
+        public async Task<bool> RejectParticipantAsync(int eventId, int participantId)
+        {
+            return await _eventService.RejectParticipantAsync(eventId, participantId);
+        }
+
+        public async Task<bool> RemoveParticipantAsync(int eventId, int participantId)
+        {
+            return await _eventService.RemoveParticipantAsync(eventId, participantId);
+        }
+
+        public async Task<bool> LeaveEventAsync(int eventId, int personId)
+        {
+            var participant = await _eventService.GetEventParticipantByEventIdAndPersonId(eventId, personId);
+            if (participant == null)
+                return false;
+                
+            return await _eventService.RemoveParticipantAsync(eventId, participant.Id);
+        }
+
+        public async Task<bool> IsEventCreatorAsync(int eventId, int personId)
+        {
+            var ev = await _eventService.GetEventByIdAsync(eventId);
+            return ev?.CreatorId == personId;
+        }
+
+        public async Task<bool> IsEventParticipantAsync(int eventId, int personId)
+        {
+            var participant = await _eventService.GetEventParticipantByEventIdAndPersonId(eventId, personId);
+            return participant != null && participant.IsApproved;
+        }
+
+        public async Task<string> GetEventCreatorNameAsync(int eventId)
+        {
+            var ev = await _eventService.GetEventByIdAsync(eventId);
+            if (ev == null)
+                throw new Exception($"Event {eventId} not found.");
+                
+            var creator = await _userService.GetUser(ev.CreatorId);
+            return creator?.UserName ?? "Unknown";
+        }
+
+        public async Task<int> GetEventParticipantCountAsync(int eventId)
+        {
+            var participants = await _eventService.GetEventParticipantsAsync(eventId, true);
+            return participants.Count();
         }
 
         // -----------------------------------
