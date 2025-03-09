@@ -13,11 +13,14 @@ namespace motoMeet
         public virtual Person Person { get; set; }
         public int PersonId { get; set; }
 
-        public DateTime AddedOn { get; set; }
-        public DateTime EditOn { get; set; }
+        // Removed AddedOn and EditOn fields as they are redundant with StartDate and EndDate
 
         public string Name { get; set; }
         public string? Description { get; set; }
+
+        // Route timing data
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
         // Spatial data (NetTopologySuite type, for example)
         public Point StartPoint { get; set; }
@@ -220,10 +223,6 @@ public int?EventStageParticipantId { get; set; }
         public double Length { get; set; }
         public TimeSpan Duration { get; set; }
         // public DifficultyLevel DifficultyLevel { get; set; }
-        public List<Point> RoutePoints => RoutePointsArray?.Select(p => new Point(new CoordinateZ(p.latitude, p.longitude, p.altitude ?? 0.0)) { SRID = 4326 }).ToList();
-        public List<int> RouteTagsIds { get; set; }
-        public bool IsActive { get; set; }
-        public bool IsCompleted { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
 

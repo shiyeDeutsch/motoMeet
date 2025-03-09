@@ -51,6 +51,7 @@ public class EventStage : EntityBase
     public string? Description { get; set; }
 
     public DateTime? StageStartTime { get; set; }
+    public DateTime? StageEndTime { get; set; }
     public int? RouteId { get; set; }
     public virtual Route Route { get; set; }
 
