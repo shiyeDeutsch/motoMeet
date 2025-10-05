@@ -38,8 +38,7 @@ namespace motoMeet
 
         public async Task<IEnumerable<Person>> GetUsersByIdsAsync(IEnumerable<int> ids)
         {
-            var query = _personRepository.GetQuery();
-            return await query.Where(p => ids.Contains(p.Id)).ToListAsync();
+            return await _personRepository.GetByIdsAsync(ids);
         }
 
         public async Task<Person> CreateUser(Person user)

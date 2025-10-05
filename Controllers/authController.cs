@@ -53,8 +53,8 @@ namespace motoMeet
             var userResult = await _userManager.CreateUser(model);
             if (userResult.IsSuccess)
             {
-                _authManager.SendVerificationEmail(userResult.User.Id);
-                return Ok(new { User = userResult.User, Token = userResult.Token });
+                await _authManager.SendVerificationEmail(userResult.Result.Id);
+                return Ok(new { User = userResult.Result, Token = userResult.Result.Token });
             }
             else
                 return BadRequest(new { ErrorMessage = userResult.ErrorMessage });

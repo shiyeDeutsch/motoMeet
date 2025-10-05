@@ -1,0 +1,22 @@
+{
+    "name": "ASP.NET Core Dev Container",
+    "dockerComposeFile": [
+      "../docker-compose.yml"
+    ],
+    "service": "app",
+    "workspaceFolder": "/src",
+    "shutdownAction": "none",
+    "onCreateCommand": "apt-get update && apt-get install -y procps"
+
+    // "postCreateCommand": "dotnet restore",
+    // "customizations": {
+    //   "cursor": {
+    //     "extensions": [
+    //       "ms-dotnettools.csharp",
+    //       "ms-dotnettools.csdevkit",
+    //       "ms-vscode.live-server",
+    //       "ms-azuretools.vscode-docker"
+    //     ]
+    //   }
+    // }
+  }

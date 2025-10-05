@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+ 
 namespace motoMeet
 {
     public class CreateRouteRequest

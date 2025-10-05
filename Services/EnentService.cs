@@ -141,11 +141,7 @@ namespace motoMeet
 
         public async Task<Event> GetEventByIdAsync(int eventId)
         {
-            return await _eventRepo.GetByIdAsync(eventId, 
-                includes: e => e.Include(ev => ev.EventStages)
-                               .Include(ev => ev.RequiredItems)
-                               .Include(ev => ev.EventActivities)
-                               .Include(ev => ev.EventParticipants));
+            return await _eventRepo.GetByIdAsync(eventId);
         }
 
         public async Task<EventStage> GetStageByIdAsync(int stageId)
@@ -167,8 +163,9 @@ namespace motoMeet
         
         public async Task<bool> UpdateEventAsync(Event ev)
         {
-            await _eventRepo.UpdateAsync(ev);
-            return await _eventRepo.SaveAsync() > 0;
+            _eventRepo.Update(ev);
+            await _eventRepo.SaveAsync();
+            return true;
         }
         
         public async Task<bool> DeleteEventAsync(int eventId)
@@ -177,8 +174,9 @@ namespace motoMeet
             if (ev == null)
                 return false;
                 
-            await _eventRepo.RemoveAsync(ev);
-            return await _eventRepo.SaveAsync() > 0;
+            _eventRepo.Delete(ev);
+            await _eventRepo.SaveAsync();
+            return true;
         }
         
         public async Task<IEnumerable<Event>> GetEventsAsync(
@@ -208,10 +206,7 @@ namespace motoMeet
                          .IncludeEventActivities()
                          .IncludeEventParticipants();
             
-            // Sort by start date
-            specification.OrderByStartDateTime();
-            
-            return await _eventRepo.FindBySpecificationAsync(specification);
+            return await _eventRepo.Find(specification);
         }
         
         public async Task<IEnumerable<EventParticipant>> GetEventParticipantsAsync(int eventId, bool? isApproved = null)
@@ -223,7 +218,7 @@ namespace motoMeet
             if (isApproved.HasValue)
                 specification.ByApprovalStatus(isApproved.Value);
                 
-            return await _participantRepo.FindBySpecificationAsync(specification);
+            return await _participantRepo.Find(specification);
         }
         
         public async Task<bool> ApproveParticipantAsync(int eventId, int participantId)
@@ -236,8 +231,9 @@ namespace motoMeet
                 return false;
                 
             participant.IsApproved = true;
-            await _participantRepo.UpdateAsync(participant);
-            return await _participantRepo.SaveAsync() > 0;
+            _participantRepo.Update(participant);
+            await _participantRepo.SaveAsync();
+            return true;
         }
         
         public async Task<bool> RejectParticipantAsync(int eventId, int participantId)
@@ -249,8 +245,9 @@ namespace motoMeet
             if (participant == null)
                 return false;
                 
-            await _participantRepo.RemoveAsync(participant);
-            return await _participantRepo.SaveAsync() > 0;
+            _participantRepo.Delete(participant);
+            await _participantRepo.SaveAsync();
+            return true;
         }
         
         public async Task<bool> RemoveParticipantAsync(int eventId, int participantId)
@@ -262,8 +259,9 @@ namespace motoMeet
             if (participant == null)
                 return false;
                 
-            await _participantRepo.RemoveAsync(participant);
-            return await _participantRepo.SaveAsync() > 0;
+            _participantRepo.Delete(participant);
+            await _participantRepo.SaveAsync();
+            return true;
         }
         
         public async Task<bool> CancelEventAsync(int eventId)
@@ -274,8 +272,9 @@ namespace motoMeet
                 
             // Mark as cancelled instead of deleting
             ev.IsCancelled = true;
-            await _eventRepo.UpdateAsync(ev);
-            return await _eventRepo.SaveAsync() > 0;
+            _eventRepo.Update(ev);
+            await _eventRepo.SaveAsync();
+            return true;
         }
     }
 }

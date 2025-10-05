@@ -18,14 +18,14 @@ namespace motoMeet
         // {
         //     // Validate if a user with the same Email already exists.
         //     bool exists = await _userService.ExistValidation(u => u.Email == user.Email);
-
+        //
         //     if (exists)
         //     {
         //         return new UserCreationResult { IsSuccess = false, ErrorMessage = "User with the same Email already exists." };
         //     }
         //     else
         //     {
-
+        //
         //         var PasswordHash = _authService.CreatePasswordHash(user.Password);
         //         var person = new Person
         //         {
@@ -38,11 +38,11 @@ namespace motoMeet
         //             Address = user.Address,
         //             PasswordHash = PasswordHash,
         //             AddedOn = DateTime.Now,
-
+        //
         //         };
         //         var newUser = await _userService.CreateUser(person);
         //         var token = _authService.GenerateJwtToken(user);
-
+        //
         //         return new UserCreationResult { IsSuccess = true, User = user, Token = token };
         //     }
         // }
@@ -52,7 +52,7 @@ namespace motoMeet
         // {
         //     // Validate if a user with the same NationalCode already exists.
         //     bool exists = await _userService.ExistValidation(u => u.Email == user.Email);
-
+        //
         //     if (exists)
         //     {
         //         throw new Exception("User with the same Email already exists.");
@@ -61,7 +61,7 @@ namespace motoMeet
         //     {
         //         var PasswordHashed = _AuthService.CreatePasswordHash(user.PasswordHash);
         //         user.PasswordHash = PasswordHashed;
-
+        //
         //         user = await _userService.CreateUser(user);
         //         var token = _AuthService.GenerateJwtToken(user);
         //         Console.WriteLine(token);
@@ -179,6 +179,16 @@ namespace motoMeet
 
             return userDto;
         }
+
+        public async Task<UserDto> GetFullUserData(string email)
+        {
+            var person = await _userService.FindFirstByExpression(p => p.Email == email);
+            if (person == null)
+            {
+                throw new Exception("User not found.");
+            }
+            return new UserDto(person);
+        }
         public async Task<bool> UserExists(int userId)
         {
             return await _userService.ExistValidation(u => u.Id == userId);
@@ -190,7 +200,7 @@ namespace motoMeet
 
             // Simple regular expression for email validation
             string emailRegex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-            return Regex.IsMatch(email, emailRegex);
+            return Regex.IsMatch(emailRegex, emailRegex);
         }
 
         private bool validatePassword(string password)

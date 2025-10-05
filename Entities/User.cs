@@ -179,7 +179,7 @@ namespace motoMeet
                 .HasOne(pf => pf.Following)
                 .WithMany(p => p.Followers) // Person.Followers: persons following this user
                 .HasForeignKey(pf => pf.FollowingId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // ---------------- Notification, Reaction, Favorite ----------------
             modelBuilder.Entity<Notification>()
@@ -269,7 +269,7 @@ namespace motoMeet
                 .HasOne(esp => esp.EventStage)
                 .WithMany(es => es.StageParticipants)
                 .HasForeignKey(esp => esp.EventStageId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
             modelBuilder.Entity<EventStageParticipant>()
                 .HasOne(esp => esp.EventParticipant)
                 .WithMany(ep => ep.StageParticipants)
@@ -277,8 +277,9 @@ namespace motoMeet
                 .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<EventStageParticipant>()
                 .HasOne(esp => esp.UserRoute)
-                .WithOne(ur => ur.EventStageParticipant) // No navigation property assumed on UserRoute
-           .HasForeignKey<UserRoute>(ur => ur.EventStageParticipantId).OnDelete(DeleteBehavior.SetNull);
+                .WithOne(ur => ur.EventStageParticipant)
+                .HasForeignKey<UserRoute>(ur => ur.EventStageParticipantId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<EventItem>()
                 .HasOne(ei => ei.Event)
@@ -363,14 +364,21 @@ namespace motoMeet
         public DbSet<UserRoutePoint> UserRoutePoints { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-
+            if (optionsBuilder.IsConfigured)
+            {
+                return;
+            }
 
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json")
+                .AddJsonFile("appsettings.json", optional: true)
                 .Build();
-            optionsBuilder.UseSqlServer(configuration.GetConnectionString("ConfigDB"), (x) => { x.UseNetTopologySuite(); });
 
+            var connectionString = configuration.GetConnectionString("ConfigDB");
+            if (!string.IsNullOrWhiteSpace(connectionString))
+            {
+                optionsBuilder.UseSqlServer(connectionString, x => x.UseNetTopologySuite());
+            }
         }
 
     }

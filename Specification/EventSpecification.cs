@@ -1,11 +1,12 @@
 using System;
 using System.Linq.Expressions;
+using System.Linq;
 
 namespace motoMeet
 {
-    public class EventSpecification : BaseSpecification<Event>
+    public class EventSpecification : Specification<Event>
     {
-        public EventSpecification() : base(e => true)
+        public EventSpecification() : base()
         {
         }
 
@@ -45,21 +46,21 @@ namespace motoMeet
             return this;
         }
 
+        // No-op to keep compatibility with callers; ordering not implemented in Repository
         public EventSpecification OrderByStartDateTime()
         {
-            ApplyOrderBy(e => e.StartDateTime);
             return this;
         }
 
+        // No-op to keep compatibility with callers; ordering not implemented in Repository
         public EventSpecification OrderByPopularity()
         {
-            ApplyOrderByDescending(e => e.EventParticipants.Count);
             return this;
         }
 
         public EventSpecification IncludeEventStages()
         {
-            AddInclude(e => e.EventStages);
+            AddInclude(e => e.Stages);
             return this;
         }
 
@@ -77,14 +78,14 @@ namespace motoMeet
 
         public EventSpecification IncludeEventParticipants()
         {
-            AddInclude(e => e.EventParticipants);
+            AddInclude(e => e.Participants);
             return this;
         }
     }
 
-    public class EventParticipantSpecification : BaseSpecification<EventParticipant>
+    public class EventParticipantSpecification : Specification<EventParticipant>
     {
-        public EventParticipantSpecification() : base(p => true)
+        public EventParticipantSpecification() : base()
         {
         }
 
@@ -108,7 +109,6 @@ namespace motoMeet
 
         public EventParticipantSpecification OrderByJoinDate()
         {
-            ApplyOrderBy(p => p.JoinedOn);
             return this;
         }
 

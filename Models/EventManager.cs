@@ -296,7 +296,7 @@ namespace motoMeet
                 throw new Exception($"Event {eventId} not found.");
                 
             var creator = await _userService.GetUser(ev.CreatorId);
-            return creator?.UserName ?? "Unknown";
+            return creator?.Username ?? "Unknown";
         }
 
         public async Task<int> GetEventParticipantCountAsync(int eventId)
@@ -339,6 +339,16 @@ namespace motoMeet
                 };
             }
 
+            // Parse stage type from string to enum if provided
+            EventStageType stageType = EventStageType.RouteSegment;
+            if (!string.IsNullOrWhiteSpace(request.StageType))
+            {
+                if (!Enum.TryParse<EventStageType>(request.StageType, true, out stageType))
+                {
+                    stageType = EventStageType.RouteSegment;
+                }
+            }
+
             // Create stage
             var stage = new EventStage
             {
@@ -347,7 +357,7 @@ namespace motoMeet
                 Description    = request.Description,
                 StageStartTime = request.StageStartTime,
                 RouteId        = route?.Id,
-                StageType      = request.StageType,
+                StageType      = stageType,
                 Location       = location
             };
 

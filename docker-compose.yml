@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  app:
+    container_name: server-app
+    image: motomeet-app:dev
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db;Database=MyDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+    ports:
+      - "5000:80"
+    volumes:
+      - .:/src
+      - /src/bin
+      - /src/obj
+    command: dotnet watch run --urls http://0.0.0.0:80
+    networks:
+      - backend
+
+  db:
+    container_name: server-db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong!Passw0rd
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    networks:
+      - backend
+
+volumes:
+  sql_data:
+
+networks:
+  backend:

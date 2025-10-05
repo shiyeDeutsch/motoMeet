@@ -29,12 +29,13 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 //builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<MotoMeetDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("ConfigDB")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ConfigDB"), sql => sql.UseNetTopologySuite()));
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IRouteService, RouteService>();
 builder.Services.AddScoped<IUserRouteService, UserRouteService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IMailingService, MailingService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<UserManager>();

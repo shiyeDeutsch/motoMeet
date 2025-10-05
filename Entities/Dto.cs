@@ -1,6 +1,4 @@
-    namespace motoMeet
-{
-    namespace motoMeet.DTOs
+namespace motoMeet.DTOs
 {
     public class UserDto
     {
@@ -156,4 +154,31 @@
     }
 }
 
-}
+// namespace motoMeet
+// {
+//     using Microsoft.EntityFrameworkCore;
+//     using Microsoft.EntityFrameworkCore.Design;
+//     using Microsoft.Extensions.Configuration;
+//     using System.IO;
+
+//     public class MotoMeetDbContextFactory : IDesignTimeDbContextFactory<MotoMeetDbContext>
+//     {
+//         public MotoMeetDbContext CreateDbContext(string[] args)
+//         {
+//             var optionsBuilder = new DbContextOptionsBuilder<MotoMeetDbContext>();
+
+//             var basePath = Directory.GetCurrentDirectory();
+//             var configuration = new ConfigurationBuilder()
+//                 .SetBasePath(basePath)
+//                 .AddJsonFile("appsettings.json", optional: true)
+//                 .AddJsonFile("appsettings.Development.json", optional: true)
+//                 .Build();
+
+//             // Force use of main appsettings.json connection string
+//             var connectionString = "Server=localhost\\SQLEXPRESS;Database=motoMeet;Trusted_Connection=True;Encrypt=False;MultipleActiveResultSets=True";
+//             optionsBuilder.UseSqlServer(connectionString, x => x.UseNetTopologySuite());
+
+//             return new MotoMeetDbContext(optionsBuilder.Options);
+//         }
+//     }
+// }
